@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
     printf("(%d,%d) = rgb(%d,%d,%d)\n", x, y, p.red(), p.green(), p.blue());
 
     image.toGrayScale();
-    // image.flipVertical();
-    // image.flipHorizontal();
+    image.quantize(257);
 
     // Show image
     QLabel label;
@@ -29,7 +28,6 @@ int main(int argc, char *argv[])
             qimg.setPixelColor(x, y, QColor(p.red(), p.green(), p.blue()));
         }
     }
-
     label.setPixmap(QPixmap::fromImage(qimg).scaled(600, 600, Qt::KeepAspectRatio));
     label.show();
 

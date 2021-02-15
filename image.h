@@ -12,11 +12,16 @@ class Image {
 
 private:
     unsigned char *data = NULL;
+
     vector<vector<Pixel>> pxls;
 
     int w;
     int h;
     int c;
+
+    bool isGrayscale = false;
+    int maxL = -1;
+    int minL = -1;
 
 
 // > Methods
@@ -45,7 +50,7 @@ public:
     void flipHorizontal();
     void flipVertical();
     void toGrayScale();
-    void quantize(int n);
+    bool quantize(int n);
 
 };
 

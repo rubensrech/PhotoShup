@@ -12,8 +12,12 @@ Image::Image(const char *filename) {
     }
 
     this->data = stbi_load(filename, &this->w, &this->h, &this->c, 0);
-    this->pxls.resize(this->w, vector<Pixel>(this->h));
 
+    this->isGrayscale = c == 1;
+    this->maxL = -1;
+    this->minL = -1;
+
+    this->pxls.resize(this->w, vector<Pixel>(this->h));
     for (int x = 0; x < this->width(); x++) {
         for (int y = 0; y < this->height(); y++) {
             this->pxls[x][y] = Pixel(this->getData(x, y));
@@ -58,15 +62,47 @@ void Image::flipVertical() {
 
 void Image::toGrayScale() {
     if (this->isEmpty()) { return; }
+    if (this->isGrayscale) { return; }
+
+    this->maxL = -1;
+    this->minL = 999;
 
     for (int x = 0; x < this->width(); x++) {
         for (int y = 0; y < this->height(); y++) {
-            Pixel p(this->pixel(x, y));
+            Pixel p = this->pixel(x, y);
             int L = 0.299*p.red() + 0.587*p.green() + 0.114*p.blue();
             p.rgb(L, L, L);
+
+            if (L > this->maxL) { this->maxL = L; }
+            if (L < this->minL) { this->minL = L; }
         }
     }
+
+    this->isGrayscale = true;
 }
 
+bool Image::quantize(int n) {
+    if (this->isEmpty()) { return false; }
+    if (!this->isGrayscale) { return false; }
 
+    int range = this->maxL - this->minL + 1;
+    if (n < range) {
+        float binSize = (float)range / n;
+        for (int x = 0; x < this->width(); x++) {
+            for (int y = 0; y < this->height(); y++) {
+                Pixel p = this->pixel(x, y);
+                int L = p.red();
+                // Calculate `index` of the L value
+                int iL = L - this->minL;
+                // Calculate `index` of the bin to which the L value should be mapped to
+                int iBin = iL / binSize;
+                // Calculate midpoint of the bin interval
+                L = (float)this->minL - 0.5 + iBin * binSize + binSize / 2;
+                p.rgb(L, L, L);
+            }
+        }
+    }
+
+    return true;
+}
 
