@@ -1,16 +1,8 @@
 #include "mainwindow.h"
-#include <QApplication>
-
-
-#include <QLabel>
-#include <vector>
-
-//#define cimg_display 0
-//#define cimg_use_jpeg
-//#include "CImg.h"
-//using namespace cimg_library;
-
 #include "image.h"
+
+#include <QApplication>
+#include <QLabel>
 
 int main(int argc, char *argv[])
 {
