@@ -3,19 +3,32 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 #include <QPixmap>
 
-Image::Image(const char *filename) {
+void Image::free() {
+    if (this->isEmpty()) { return; }
+
+    stbi_image_free(this->data);
+    this->data = NULL;
+    this->pxls.clear();
+
+    this->isGrayscale = false;
+    this->maxL = -1;
+    this->minL = -1;
+}
+
+void Image::load(const char *filename) {
     if (!this->isEmpty()) {
-        stbi_image_free(this->data);
-        this->pxls.clear();
+        this->free();
     }
 
+    this->filename = string(filename);
     this->data = stbi_load(filename, &this->w, &this->h, &this->c, 0);
 
     this->isGrayscale = c == 1;
-    this->maxL = -1;
-    this->minL = -1;
 
     this->pxls.resize(this->w, vector<Pixel>(this->h));
     for (int x = 0; x < this->width(); x++) {
@@ -25,14 +38,33 @@ Image::Image(const char *filename) {
     }
 }
 
-Image::~Image() {
-    if (this->isEmpty()) { return; }
+bool Image::save(const char *filename, int quality) {
+    string f(filename);
+    string ext = f.substr(f.find_last_of('.')+1);
+    for_each(ext.begin(), ext.end(), [](char &c) { c = ::tolower(c); });
 
-    stbi_image_free(this->data);
-    this->data = NULL;
+    if (ext == "jpg")
+        return stbi_write_jpg(filename, this->width(), this->height(), this->channels(), this->data, quality) != 0;
+
+    if (ext == "png")
+        return stbi_write_png(filename, this->width(), this->height(), this->channels(),this->data, quality) != 0;
+
+    throw runtime_error("Image::save - Unsupported file extension");
+
+    return false;
 }
 
-void Image::flipHorizontal() {
+Image::Image(const char *filename) {
+    this->load(filename);
+}
+
+Image::~Image() {
+    this->free();
+}
+
+// > Image processing
+
+void Image::flipHorizontally() {
     int pixelSize = this->channels();
     unsigned char tmp[pixelSize];
     for (int x = 0; x < this->width()/2; x++) {
@@ -47,7 +79,7 @@ void Image::flipHorizontal() {
     }
 }
 
-void Image::flipVertical() {
+void Image::flipVertically() {
     int rowSize = this->channels() * this->width();
     unsigned char tmp[rowSize];
     for (int y = 0; y < this->height()/2; y++) {

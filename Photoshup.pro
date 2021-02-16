@@ -10,15 +10,18 @@ CONFIG += c++11
 
 SOURCES += \
     image.cpp \
+    imagelabel.cpp \
     main.cpp \
     mainwindow.cpp \
     pixel.cpp
 
 HEADERS += \
     image.h \
+    imagelabel.h \
     mainwindow.h \
     pixel.h \
-    stb_image.h
+    stb_image.h \
+    stb_image_write.h
 
 FORMS += \
     mainwindow.ui
