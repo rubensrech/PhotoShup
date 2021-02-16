@@ -2,23 +2,38 @@
 
 #include <QBitmap>
 
-#define IMAGE_HEIGHT 600
+#define MAX_HEIGHT 600
 
-ImageLabel::ImageLabel(Image *img): QLabel() {
-    this->img = img;
-    this->render();
+ImageLabel::ImageLabel(QWidget *parent, Image *img)
+        : QLabel(parent) {
+    this->setImage(img);
 }
 
-ImageLabel::ImageLabel(Image *img, QWidget *parent):
-        ImageLabel(img) {
-    this->setParent(parent);
-}
-
-ImageLabel::ImageLabel(Image *img, QString windowTitle):
-        ImageLabel(img) {
-    this->show();
+ImageLabel::ImageLabel(QString windowTitle, Image *img)
+        : QLabel() {
     this->setWindowTitle(windowTitle);
-    this->setFixedSize(QSize(img->scaledWidth(IMAGE_HEIGHT), IMAGE_HEIGHT));
+    this->setImage(img);
+}
+
+void ImageLabel::setImage(Image *img) {
+    if (!img) {
+        this->hide();
+        return;
+    }
+
+    this->img = img;
+
+    if (img->height() > MAX_HEIGHT) {
+        this->pixmapHeight = MAX_HEIGHT;
+        this->pixmapWidth = img->scaledWidth(MAX_HEIGHT);
+    } else {
+        this->pixmapHeight = img->height();
+        this->pixmapWidth = img->width();
+    }
+
+    this->render();
+    this->setFixedSize(QSize(this->pixmapWidth, this->pixmapHeight));
+    this->show();
 }
 
 void ImageLabel::render() {
@@ -26,7 +41,7 @@ void ImageLabel::render() {
 
     int w = img->width(), h = img->height(), c = img->channels();
     QImage qimg(img->getData(), w, h, w*c, QImage::Format_RGB888);
-    QPixmap pixmap = QPixmap::fromImage(qimg).scaledToHeight(IMAGE_HEIGHT);
+    QPixmap pixmap = QPixmap::fromImage(qimg).scaledToHeight(this->pixmapHeight);
 
     this->setPixmap(pixmap);
 }

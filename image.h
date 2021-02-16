@@ -52,6 +52,7 @@ public:
     unsigned char *getData() { return data; }
     unsigned char *getData(int x, int y, int c = 0) { return (!isEmpty()) ? &data[this->c*(y*w + x) + c] : NULL; }
     unsigned char *getRow(int y) { return this->getData(0, y); }
+    string getFilename() { return this->filename; };
     int width() { return this->w; }
     int height() { return this->h; }
     int channels() { return this->c; }

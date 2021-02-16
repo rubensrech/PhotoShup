@@ -18,18 +18,20 @@ class MainWindow : public QMainWindow {
 // > Properties
 
 private:
-    Image *img;
-    Image *origImg;
+    Ui::MainWindow *ui;
 
+    Image *img = nullptr;
+    Image *origImg = nullptr;
+
+    vector<QWidget*> controls;
     ImageLabel *imgLabel;
     ImageLabel *origImgLabel;
     QSpinBox *quantizeValBox;
 
 // > Methods
 
-public:
-    MainWindow(const char *filename = nullptr);
-    ~MainWindow();
+private:
+    void setControlsDisabled(bool disabled);
 
     // > Button event handlers
     void handleHFlipClicked();
@@ -38,8 +40,11 @@ public:
     void handleQuantizeClicked();
     void handleCopyClicked();
     void handleSaveClicked();
+    void handleOpenClicked();
 
-private:
-    Ui::MainWindow *ui;
+public:
+    MainWindow(const char *filename = nullptr);
+    ~MainWindow();
+
 };
 #endif // MAINWINDOW_H

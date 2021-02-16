@@ -5,16 +5,18 @@
 
 #include <QLabel>
 
-class ImageLabel : public QLabel
-{
+class ImageLabel : public QLabel {
+
 private:
     Image *img;
+    int pixmapWidth;
+    int pixmapHeight;
 
 public:
-    ImageLabel(Image *img);
-    ImageLabel(Image *img, QWidget *parent);
-    ImageLabel(Image *img, QString windowTitle);
+    ImageLabel(QWidget *parent, Image *img = nullptr);
+    ImageLabel(QString windowTitle, Image *img = nullptr);
 
+    void setImage(Image *img);
     void render();
 };
 
