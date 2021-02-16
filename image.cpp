@@ -8,6 +8,9 @@
 
 #include <QPixmap>
 
+#include <iostream>
+using namespace std;
+
 void Image::free() {
     if (this->isEmpty()) { return; }
 
@@ -119,23 +122,31 @@ void Image::toGrayScale() {
 }
 
 bool Image::quantize(int n) {
-    if (this->isEmpty()) { return false; }
-    if (!this->isGrayscale) { return false; }
+    if (isEmpty()) { return false; }
+    if (!isGrayscale) { return false; }
 
-    int range = this->maxL - this->minL + 1;
+    int range = maxL - minL + 1;
+    int minL = this->minL;
+
     if (n < range) {
+        this->maxL = -1;
+        this->minL = 999;
+
         float binSize = (float)range / n;
-        for (int x = 0; x < this->width(); x++) {
-            for (int y = 0; y < this->height(); y++) {
-                Pixel p = this->pixel(x, y);
+        for (int x = 0; x < width(); x++) {
+            for (int y = 0; y < height(); y++) {
+                Pixel p = pixel(x, y);
                 int L = p.red();
                 // Calculate `index` of the L value
-                int iL = L - this->minL;
+                int iL = L - minL;
                 // Calculate `index` of the bin to which the L value should be mapped to
                 int iBin = iL / binSize;
                 // Calculate midpoint of the bin interval
-                L = (float)this->minL - 0.5 + iBin * binSize + binSize / 2;
+                L = int((float)minL - 0.5 + (float)iBin * binSize + binSize / 2.0);
                 p.rgb(L, L, L);
+
+                if (L > this->maxL) { this->maxL = L; }
+                if (L < this->minL) { this->minL = L; }
             }
         }
     }

@@ -6,6 +6,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QSpinBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,6 +23,7 @@ private:
 
     ImageLabel *imgLabel;
     ImageLabel *origImgLabel;
+    QSpinBox *quantizeValBox;
 
 // > Methods
 

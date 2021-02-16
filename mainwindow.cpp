@@ -53,6 +53,11 @@ MainWindow::MainWindow(const char *filename):
     buttonsWrapperLayout->addWidget(grayscaleButton);
 
     // -- Quantize button
+    quantizeValBox = new QSpinBox(buttonsWrapper);
+    quantizeValBox->setRange(0, 256);
+    quantizeValBox->setSingleStep(10);
+    quantizeValBox->setValue(256);
+    buttonsWrapperLayout->addWidget(quantizeValBox);
     QPushButton *quantizeButton = new QPushButton("Quantize", buttonsWrapper);
     connect(quantizeButton, &QPushButton::clicked, this, &MainWindow::handleQuantizeClicked);
     buttonsWrapperLayout->addWidget(quantizeButton);
@@ -93,7 +98,8 @@ void MainWindow::handleGrayscaleClicked() {
 }
 
 void MainWindow::handleQuantizeClicked() {
-    img->quantize(10);
+    int n = quantizeValBox->value();
+    img->quantize(n);
     imgLabel->render();
 }
 
