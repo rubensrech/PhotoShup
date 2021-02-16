@@ -10,6 +10,7 @@
 using namespace std;
 
 #define CONTROLS_WIDTH 200
+#define MIN_HEIGHT 340
 
 MainWindow::MainWindow(const char *filename):
     QMainWindow(), ui(new Ui::MainWindow) {
@@ -96,7 +97,7 @@ MainWindow::MainWindow(const char *filename):
         imgLabel->setImage(img);
     } else {
         setControlsDisabled(true);
-        setFixedSize(QSize(CONTROLS_WIDTH+40, 330));
+        setFixedSize(QSize(CONTROLS_WIDTH+40, MIN_HEIGHT));
     }
 }
 
@@ -160,6 +161,7 @@ void MainWindow::handleOpenClicked() {
         imgLabel->setImage(img);
 
         setControlsDisabled(false);
-        setFixedSize(QSize(imgLabel->width()+CONTROLS_WIDTH+56, imgLabel->height()+51));
+        int h = (imgLabel->height()+51 < MIN_HEIGHT) ? MIN_HEIGHT : imgLabel->height()+51;
+        setFixedSize(QSize(imgLabel->width()+CONTROLS_WIDTH+56, h));
     }
 }
