@@ -57,6 +57,11 @@ MainWindow::MainWindow(const char *filename):
     connect(quantizeButton, &QPushButton::clicked, this, &MainWindow::handleQuantizeClicked);
     buttonsWrapperLayout->addWidget(quantizeButton);
 
+    // -- Save button
+    QPushButton *saveButton = new QPushButton("Save", buttonsWrapper);
+    connect(saveButton, &QPushButton::clicked, this, &MainWindow::handleSaveClicked);
+    buttonsWrapperLayout->addWidget(saveButton);
+
     layout->addWidget(this->imgLabel);
     layout->addWidget(buttonsWrapper);
 
@@ -93,5 +98,10 @@ void MainWindow::handleQuantizeClicked() {
 }
 
 void MainWindow::handleCopyClicked() {
-    cout << "Copy" << endl;
+    img->copy(origImg);
+    imgLabel->render();
+}
+
+void MainWindow::handleSaveClicked() {
+    cout << "Save" << endl;
 }

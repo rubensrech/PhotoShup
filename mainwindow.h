@@ -35,6 +35,7 @@ public:
     void handleGrayscaleClicked();
     void handleQuantizeClicked();
     void handleCopyClicked();
+    void handleSaveClicked();
 
 private:
     Ui::MainWindow *ui;

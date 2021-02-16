@@ -54,6 +54,11 @@ bool Image::save(const char *filename, int quality) {
     return false;
 }
 
+void Image::copy(Image *img) {
+    memcpy(data, img->data, width()*height()*channels()*sizeof(unsigned char));
+    isGrayscale = false;
+}
+
 Image::Image(const char *filename) {
     this->load(filename);
 }
