@@ -145,14 +145,16 @@ void MainWindow::handleCopyClicked() {
 void MainWindow::handleSaveClicked() {
     QString origFilename = QString::fromStdString(img->getFilename());
     QString filename = QFileDialog::getSaveFileName(this, "Save image", origFilename);
-    img->save(filename.toStdString().c_str());
+    if (!filename.isEmpty() && !filename.isNull()) {
+        img->save(filename.toStdString().c_str());
+    }
 }
 
 void MainWindow::handleOpenClicked() {
     if (origImg) delete origImg;
     if (img) delete img;
 
-    QString filename = QFileDialog::getOpenFileName(this, "Open image", nullptr, "Images (*.png, *.jpg)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open image", nullptr, "Images (*.jpg)");
     if (!filename.isEmpty() && !filename.isNull()) {
         origImg = new Image(filename.toStdString().c_str());
         img = new Image(filename.toStdString().c_str());

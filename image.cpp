@@ -49,9 +49,6 @@ bool Image::save(const char *filename, int quality) {
     if (ext == "jpg")
         return stbi_write_jpg(filename, this->width(), this->height(), this->channels(), this->data, quality) != 0;
 
-    if (ext == "png")
-        return stbi_write_png(filename, this->width(), this->height(), this->channels(),this->data, quality) != 0;
-
     throw runtime_error("Image::save - Unsupported file extension");
 
     return false;
@@ -105,7 +102,7 @@ void Image::toGrayScale() {
     if (this->isGrayscale) { return; }
 
     this->maxL = -1;
-    this->minL = 999;
+    this->minL = 256;
 
     for (int x = 0; x < this->width(); x++) {
         for (int y = 0; y < this->height(); y++) {
