@@ -19,13 +19,13 @@ using namespace std;
 void Image::free() {
     if (this->isEmpty()) { return; }
 
-    stbi_image_free(this->data);
-    this->data = NULL;
-    this->pxls.clear();
+    stbi_image_free(this->_data);
+    this->_data = NULL;
+    this->_pxls.clear();
 
-    this->isGrayscale = false;
-    this->maxL = -1;
-    this->minL = -1;
+    this->_isGrayscale = false;
+    this->_maxL = -1;
+    this->_minL = -1;
 }
 
 void Image::load(const char *filename) {
@@ -33,17 +33,32 @@ void Image::load(const char *filename) {
         this->free();
     }
 
-    this->filename = string(filename);
-    this->data = stbi_load(filename, &this->w, &this->h, &this->c, 0);
+    this->_filename = string(filename);
+    this->_data = stbi_load(filename, &this->w, &this->h, &this->c, 0);
 
-    this->isGrayscale = c == 1;
+    this->_isGrayscale = c == 1;
 
-    this->pxls.resize(this->w, vector<Pixel>(this->h));
+    this->_pxls.resize(this->w, vector<Pixel>(this->h));
     for (int x = 0; x < this->width(); x++) {
         for (int y = 0; y < this->height(); y++) {
-            this->pxls[x][y] = Pixel(this->getData(x, y));
+            this->_pxls[x][y] = Pixel(this->data(x, y));
         }
     }
+}
+
+Image::Image(const char *filename) {
+    load(filename);
+}
+
+Image::Image(const char *filename, QString windowTitle): Image(filename) {
+    _window = new ImageWindow(windowTitle);
+    render();
+}
+
+Image::~Image() {
+    this->free();
+
+    if (this->_window) delete this->_window;
 }
 
 bool Image::save(const char *filename, int quality) {
@@ -52,7 +67,7 @@ bool Image::save(const char *filename, int quality) {
     for_each(ext.begin(), ext.end(), [](char &c) { c = ::tolower(c); });
 
     if (ext == "jpg")
-        return stbi_write_jpg(filename, this->width(), this->height(), this->channels(), this->data, quality) != 0;
+        return stbi_write_jpg(filename, width(), height(), channels(), data(), quality) != 0;
 
     throw runtime_error("Image::save - Unsupported file extension");
 
@@ -60,8 +75,8 @@ bool Image::save(const char *filename, int quality) {
 }
 
 void Image::copy(Image *img) {
-    memcpy(data, img->data, width()*height()*channels()*sizeof(unsigned char));
-    isGrayscale = false;
+    memcpy(_data, img->_data, width()*height()*channels()*sizeof(unsigned char));
+    _isGrayscale = false;
 }
 
 void Image::render() {
@@ -70,7 +85,7 @@ void Image::render() {
     int w = width(), h = height(), c = channels();
 
     // Create QImage
-    QImage qimg(getData(), w, h, w*c, QImage::Format_RGB888);
+    QImage qimg(data(), w, h, w*c, QImage::Format_RGB888);
 
     // Define dimensions and resize if needed
     QRect screenRect = QGuiApplication::primaryScreen()->geometry();
@@ -99,36 +114,21 @@ void Image::render() {
         pixmap = QPixmap::fromImage(qimg).scaledToHeight(pixmapHeight);
     }
 
-//    window()->setFixedSize(QSize(pixmap.width(), pixmap.height()));
+    window()->setFixedSize(QSize(pixmap.width(), pixmap.height()));
     window()->setPixmap(pixmap);
     window()->show();
-    window()->adjustSize();
-}
-
-Image::Image(const char *filename) {
-    this->load(filename);
-}
-
-Image::Image(const char *filename, QString windowTitle): Image(filename) {
-    this->_window = new ImageWindow(windowTitle);
-    render();
-}
-
-Image::~Image() {
-    this->free();
-
-    if (this->_window) delete this->_window;
+//    window()->adjustSize();
 }
 
 // > Image processing
 
 void Image::flipHorizontally() {
-    int pixelSize = this->channels();
+    int pixelSize = channels();
     unsigned char tmp[pixelSize];
-    for (int x = 0; x < this->width()/2; x++) {
-        for (int y = 0; y < this->height(); y++) {
-            unsigned char *leftPx = this->getData(x, y);
-            unsigned char *rightPx = this->getData(this->width()-1 - x, y);
+    for (int x = 0; x < width()/2; x++) {
+        for (int y = 0; y < height(); y++) {
+            unsigned char *leftPx = data(x, y);
+            unsigned char *rightPx = data(width()-1 - x, y);
 
             memcpy(tmp, leftPx, pixelSize*sizeof(unsigned char));
             memcpy(leftPx, rightPx, pixelSize*sizeof(unsigned char));
@@ -138,11 +138,11 @@ void Image::flipHorizontally() {
 }
 
 void Image::flipVertically() {
-    int rowSize = this->channels() * this->width();
+    int rowSize = channels() * width();
     unsigned char tmp[rowSize];
-    for (int y = 0; y < this->height()/2; y++) {
-        unsigned char *topRow = this->getRow(y);
-        unsigned char *bottomRow = this->getRow(this->height()-1 - y);
+    for (int y = 0; y < height()/2; y++) {
+        unsigned char *topRow = row(y);
+        unsigned char *bottomRow = row(height()-1 - y);
 
         memcpy(tmp, topRow, rowSize*sizeof(unsigned char));
         memcpy(topRow, bottomRow, rowSize*sizeof(unsigned char));
@@ -151,38 +151,36 @@ void Image::flipVertically() {
 }
 
 void Image::toGrayScale() {
-    if (this->isEmpty()) { return; }
-    if (this->isGrayscale) { return; }
+    if (isEmpty()) { return; }
+    if (_isGrayscale) { return; }
 
-    this->maxL = -1;
-    this->minL = 256;
+    _maxL = -1;
+    _minL = 256;
 
-    for (int x = 0; x < this->width(); x++) {
-        for (int y = 0; y < this->height(); y++) {
-            Pixel p = this->pixel(x, y);
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
             int L = 0.299*p.red() + 0.587*p.green() + 0.114*p.blue();
             p.rgb(L, L, L);
 
-            if (L > this->maxL) { this->maxL = L; }
-            if (L < this->minL) { this->minL = L; }
+            if (L > _maxL) { _maxL = L; }
+            if (L < _minL) { _minL = L; }
         }
     }
 
-    this->isGrayscale = true;
+    _isGrayscale = true;
 }
 
 bool Image::quantize(int n) {
     if (isEmpty()) { return false; }
-    if (!isGrayscale) {
-        this->toGrayScale();
-    }
+    if (!_isGrayscale) { toGrayScale(); }
 
-    int range = maxL - minL + 1;
-    int minL = this->minL;
+    int range = _maxL - _minL + 1;
+    int minL = _minL;
 
     if (n < range) {
-        this->maxL = -1;
-        this->minL = 999;
+        _maxL = -1;
+        _minL = 999;
 
         float binSize = (float)range / n;
         for (int x = 0; x < width(); x++) {
@@ -197,8 +195,8 @@ bool Image::quantize(int n) {
                 L = int((float)minL - 0.5 + (float)iBin * binSize + binSize / 2.0);
                 p.rgb(L, L, L);
 
-                if (L > this->maxL) { this->maxL = L; }
-                if (L < this->minL) { this->minL = L; }
+                if (L > _maxL) { _maxL = L; }
+                if (L < _minL) { _minL = L; }
             }
         }
     }
@@ -208,9 +206,7 @@ bool Image::quantize(int n) {
 
 int* Image::grayscaleHistogram() {
     if (isEmpty()) { return nullptr; }
-    if (!isGrayscale) {
-        this->toGrayScale();
-    }
+    if (!_isGrayscale) { toGrayScale(); }
 
     int *histogram = new int[256];
 

@@ -76,7 +76,7 @@ void MainWindow::openImgFile(const char *filename) {
 }
 
 void MainWindow::saveImg() {
-    QString origFilename = QString::fromStdString(img->getFilename());
+    QString origFilename = QString::fromStdString(img->filename());
     QString filename = QFileDialog::getSaveFileName(this, "Save image", origFilename);
     if (!filename.isEmpty() && !filename.isNull()) {
         img->save(filename.toStdString().c_str());

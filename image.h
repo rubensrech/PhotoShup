@@ -13,18 +13,18 @@ class Image {
 // > Properties
 
 private:
-    string filename;
+    string _filename;
 
-    unsigned char *data = NULL;
-    vector<vector<Pixel>> pxls;
+    unsigned char *_data = NULL;
+    vector<vector<Pixel>> _pxls;
 
     int w;
     int h;
     int c;
 
-    bool isGrayscale = false;
-    int maxL = -1;
-    int minL = -1;
+    bool _isGrayscale = false;
+    int _maxL = -1;
+    int _minL = -1;
 
     ImageWindow *_window = nullptr;
 
@@ -32,46 +32,49 @@ private:
 
 private:
     void free();
+    void load(const char *filename);
 
 public:
     // > Constructors / Destructors
     Image(const char *filename);
     Image(const char *filename, QString windowTitle);
-
     ~Image();
 
-    void load(const char *filename);
+
     bool save(const char *filename, int quality = 90);
     void copy(Image *img);
 
     void render();
 
+    // > Getters
+
+    string filename() { return _filename; }
     ImageWindow *window() { return _window; }
 
-    unsigned char *getData() { return data; }
-    unsigned char *getData(int x, int y, int c = 0) { return (!isEmpty()) ? &data[this->c*(y*w + x) + c] : NULL; }
-    unsigned char *getRow(int y) { return this->getData(0, y); }
-    string getFilename() { return this->filename; };
+    bool isEmpty() { return _data == NULL; }
 
-    bool isEmpty() { return this->data == NULL; }
+    unsigned char *data() { return _data; }
 
-    int width() { return this->w; }
-    int height() { return this->h; }
-    int channels() { return this->c; }
+    Pixel pixel(int x, int y) { return _pxls[x][y]; }
+
+    int width() { return w; }
+    int height() { return h; }
+    int channels() { return c; }
+
+    string extension() { return filename().substr(filename().find_last_of(".")+1); }
+
+    unsigned char *data(int x, int y, int c = 0) { return (!isEmpty()) ? &data()[this->c*(y*w + x) + c] : NULL; }
+    unsigned char *row(int y) { return data(0, y); }
 
     int scaledWidth(int h) { return width()*h/height(); };
     int scaledHeight(int w) { return height()*w/width(); };
 
-    Pixel pixel(int x, int y) { return this->pxls[x][y]; }
-
-    string extension() { return filename.substr(filename.find_last_of(".")+1); }
-
     // > Image processing
+
     void flipHorizontally();
     void flipVertically();
     void toGrayScale();
     bool quantize(int n);
-
     int *grayscaleHistogram();
 
 };
