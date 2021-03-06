@@ -120,7 +120,9 @@ void Image::toGrayScale() {
 
 bool Image::quantize(int n) {
     if (isEmpty()) { return false; }
-    if (!isGrayscale) { return false; }
+    if (!isGrayscale) {
+        this->toGrayScale();
+    }
 
     int range = maxL - minL + 1;
     int minL = this->minL;

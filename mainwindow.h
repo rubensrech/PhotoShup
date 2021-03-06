@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "controlswrapper.h"
 #include "image.h"
 #include "imagelabel.h"
 
@@ -20,29 +21,28 @@ class MainWindow : public QMainWindow {
 private:
     Ui::MainWindow *ui;
 
-    Image *img = nullptr;
-    Image *origImg = nullptr;
+    ControlsWrapper *controls;
 
-    vector<QWidget*> controls;
     ImageLabel *imgLabel;
     ImageLabel *origImgLabel;
-    QSpinBox *quantizeValBox;
+
+    Image *img = nullptr;
+    Image *origImg = nullptr;
 
 // > Methods
 
 private:
-    void setControlsDisabled(bool disabled);
-
-    // > Button event handlers
-    void handleHFlipClicked();
-    void handleVFlipClicked();
-    void handleGrayscaleClicked();
-    void handleQuantizeClicked();
-    void handleCopyClicked();
-    void handleSaveClicked();
-    void handleOpenClicked();
-
     void closeEvent(QCloseEvent *bar);
+
+private slots:
+    void openImgFile(const char *filename);
+    void hflipImg();
+    void vflipImg();
+    void grayscaleImg();
+    void quantizeImg(int n);
+    void copyOriginalImg();
+    void saveImg();
+
 
 public:
     MainWindow(const char *filename = nullptr);
