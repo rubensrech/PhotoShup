@@ -3,104 +3,131 @@
 #include <QFileDialog>
 #include <QGroupBox>
 #include <QLabel>
-#include <QPushButton>
 #include <QVBoxLayout>
 
 #define DFT_SPACING 5
 #define DFT_MARGIN  5
 
-ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignHCenter);
+QPushButton *ControlsWrapper::createButton(QString title, QWidget *parent, bool disabling) {
+    QPushButton *button = new QPushButton(title, parent);
+    if (disabling) {
+        disablingControls.push_back(button);
+    }
+    return button;
+}
 
-    // 1. Image File group
-    QGroupBox *imgFileGroup = new QGroupBox("Image File", this);
-    QVBoxLayout *imgFileGroupLayout = new QVBoxLayout(imgFileGroup);
-    imgFileGroupLayout->setSpacing(DFT_SPACING);
-    imgFileGroupLayout->setMargin(DFT_MARGIN);
-    imgFileGroup->setLayout(imgFileGroupLayout);
-    layout->addWidget(imgFileGroup);
+QWidget *ControlsWrapper::createImgFileControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Image File", parent);
 
-    // 1.1. Open button
-    QPushButton *openButton = new QPushButton("Open", this);
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Open button
+    QPushButton *openButton = createButton("Open", this, false);
     connect(openButton, &QPushButton::clicked, this, &ControlsWrapper::handleOpenClicked);
-    imgFileGroupLayout->addWidget(openButton);
+    layout->addWidget(openButton);
 
-    // 1.2. Save button
-    QPushButton *saveButton = new QPushButton("Save", this);
-    connect(saveButton, &QPushButton::clicked, this, &ControlsWrapper::saveClicked);
-    imgFileGroupLayout->addWidget(saveButton);
-    disablingControls.push_back(saveButton);
+    // 2. Save button
+    QPushButton *saveButton = createButton("Save", this);
+    connect(openButton, &QPushButton::clicked, this, &ControlsWrapper::saveClicked);
+    layout->addWidget(saveButton);
 
-    // 2. Image Processing group
-    QGroupBox *imgProcessGroup = new QGroupBox("Image Processing", this);
-    QVBoxLayout *imgProcessGroupLayout = new QVBoxLayout(imgProcessGroup);
-    imgProcessGroupLayout->setSpacing(DFT_SPACING);
-    imgProcessGroupLayout->setMargin(DFT_MARGIN);
-    imgProcessGroup->setLayout(imgProcessGroupLayout);
-    layout->addWidget(imgProcessGroup);
+    return group;
+}
 
-    // 2.1. Copy button
-    QPushButton *copyButton = new QPushButton("Copy original", this);
-    connect(copyButton, &QPushButton::clicked, this, &ControlsWrapper::copyClicked);
-    imgProcessGroupLayout->addWidget(copyButton);
-    disablingControls.push_back(copyButton);
+QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Quantization", parent);
 
-    // 2.2. HFlip button
-    QPushButton *hFlipButton = new QPushButton("Flip Horizontally", imgProcessGroup);
-    imgProcessGroupLayout->addWidget(hFlipButton);
-    connect(hFlipButton, &QPushButton::clicked, this, &ControlsWrapper::hflipClicked);
-    disablingControls.push_back(hFlipButton);
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
 
-    // 2.3. VFlip button
-    QPushButton *vFlipButton = new QPushButton("Flip Vertically", imgProcessGroup);
-    imgProcessGroupLayout->addWidget(vFlipButton);
-    connect(vFlipButton, &QPushButton::clicked, this, &ControlsWrapper::vflipClicked);
-    disablingControls.push_back(vFlipButton);
+    group->setLayout(layout);
 
-    // 2.4. Grayscale button
-    QPushButton *grayscaleButton = new QPushButton("Grayscale", imgProcessGroup);
-    imgProcessGroupLayout->addWidget(grayscaleButton);
-    connect(grayscaleButton, &QPushButton::clicked, this, &ControlsWrapper::grayscaleClicked);
-    disablingControls.push_back(grayscaleButton);
+    // 1. Quantization row
+    QWidget *row = new QWidget(group);
 
-    // 2.5. Quantization group
-    QGroupBox *quantGroup = new QGroupBox("Quantization", imgProcessGroup);
-    QVBoxLayout *quantGroupLayout = new QVBoxLayout(quantGroup);
-    quantGroupLayout->setSpacing(DFT_SPACING);
-    quantGroupLayout->setMargin(DFT_MARGIN);
-    quantGroup->setLayout(quantGroupLayout);
-    imgProcessGroupLayout->addWidget(quantGroup);
-    // 2.5.1. Quantization row
-    QWidget *quantRow = new QWidget(quantGroup);
-    QHBoxLayout *quantRowLayout = new QHBoxLayout(quantRow);
-    quantRowLayout->setSpacing(DFT_SPACING);
-    quantRowLayout->setMargin(DFT_MARGIN);
-    quantRow->setLayout(quantRowLayout);
-    quantGroupLayout->addWidget(quantRow);
-    // 2.5.1.1. Quantization label
-    QLabel *quantLabel = new QLabel("Colors: ", quantGroup);
-    quantRowLayout->addWidget(quantLabel);
-    // 2.5.1.2. Quantization spin box
-    quantizeValBox = new QSpinBox(quantGroup);
+    QHBoxLayout *rowLayout = new QHBoxLayout(row);
+    rowLayout->setSpacing(DFT_SPACING);
+    rowLayout->setMargin(DFT_MARGIN);
+
+    row->setLayout(rowLayout);
+    layout->addWidget(row);
+
+    // 1.1. Quantization label
+    QLabel *label = new QLabel("Colors: ", row);
+    rowLayout->addWidget(label);
+
+    // 1.2. Quantization spin box
+    quantizeValBox = new QSpinBox(row);
     quantizeValBox->setRange(0, 256);
     quantizeValBox->setSingleStep(10);
     quantizeValBox->setValue(256);
-    quantRowLayout->addWidget(quantizeValBox);
+    rowLayout->addWidget(quantizeValBox);
     disablingControls.push_back(quantizeValBox);
-    // 2.5.2. Quantization button
-    QPushButton *quantButton = new QPushButton("Quantize", quantGroup);
-    quantGroupLayout->addWidget(quantButton);
+
+    // 2. Quantization button
+    QPushButton *quantButton = createButton("Quantize", group);
     connect(quantButton, &QPushButton::clicked, this, &ControlsWrapper::handleQuantizeClicked);
-    disablingControls.push_back(quantButton);
+    layout->addWidget(quantButton);
 
-    // 2.6. Histogram button
-    QPushButton *histogramButton = new QPushButton("Histogram", imgProcessGroup);
-    imgProcessGroupLayout->addWidget(histogramButton);
+    return group;
+}
+
+
+QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Image Processing", parent);
+
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Copy button
+    QPushButton *copyButton = createButton("Copy original", group);
+    connect(copyButton, &QPushButton::clicked, this, &ControlsWrapper::copyClicked);
+    layout->addWidget(copyButton);
+
+    // 2. HFlip button
+    QPushButton *hFlipButton = createButton("Flip Horizontally", group);
+    connect(hFlipButton, &QPushButton::clicked, this, &ControlsWrapper::hflipClicked);
+    layout->addWidget(hFlipButton);
+
+    // 3. VFlip button
+    QPushButton *vFlipButton = createButton("Flip Vertically", group);
+    connect(vFlipButton, &QPushButton::clicked, this, &ControlsWrapper::vflipClicked);
+    layout->addWidget(vFlipButton);
+
+    // 4. Grayscale button
+    QPushButton *grayscaleButton = createButton("Grayscale", group);
+    connect(grayscaleButton, &QPushButton::clicked, this, &ControlsWrapper::grayscaleClicked);
+    layout->addWidget(grayscaleButton);
+
+    // 5. Quantization group
+    layout->addWidget(createQuantizationControls(group));
+
+    // 6. Histogram button
+    QPushButton *histogramButton = createButton("Histogram", group);
     connect(histogramButton, &QPushButton::clicked, this, &ControlsWrapper::histogramClicked);
-    disablingControls.push_back(histogramButton);
+    layout->addWidget(histogramButton);
 
+    return group;
+}
+
+ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setAlignment(Qt::AlignHCenter);
+
+    // 1. Image File controls
+    layout->addWidget(createImgFileControls(this));
+
+    // 2. Image Processing controls
+    layout->addWidget(createImgProcessingControls(this));
 }
 
 void ControlsWrapper::setDisabled(bool disabled) {

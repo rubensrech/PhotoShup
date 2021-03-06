@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 
+#include <QPushButton>
 #include <QSpinBox>
 #include <QWidget>
 
@@ -17,6 +18,14 @@ private:
     QSpinBox *quantizeValBox;
 
 // > Methods
+
+private:
+    QPushButton *createButton(QString title, QWidget *parent, bool disabling = true);
+
+    QWidget *createImgFileControls(QWidget *parent);
+
+    QWidget *createQuantizationControls(QWidget *parent);
+    QWidget *createImgProcessingControls(QWidget *parent);
 
 public:
     explicit ControlsWrapper(QWidget *parent = nullptr);
