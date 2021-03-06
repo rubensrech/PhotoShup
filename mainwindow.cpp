@@ -1,4 +1,4 @@
-﻿#include "imagelabel.h"
+﻿#include "imagewindow.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -35,14 +35,9 @@ MainWindow::MainWindow(const char *filename):
     this->setCentralWidget(centralWidget);
     this->adjustSize();
 
-    origImgLabel = new ImageLabel("Original image");
-    imgLabel = new ImageLabel("Edited image");
-
     if (filename) {
-        origImg = new Image(filename);
-        img = new Image(filename);
-        origImgLabel->setImage(origImg);
-        imgLabel->setImage(img);
+        origImg = new Image(filename, "Original image");
+        img = new Image(filename, "Edited image");
     } else {
         controls->setDisabled(true);
     }
@@ -50,9 +45,6 @@ MainWindow::MainWindow(const char *filename):
 
 MainWindow::~MainWindow() {
     delete ui;
-
-    if (origImgLabel) delete origImgLabel;
-    if (imgLabel) delete imgLabel;
 
     if (img) delete img;
     if (origImg) delete origImg;
@@ -62,27 +54,24 @@ void MainWindow::openImgFile(const char *filename) {
     if (origImg) delete origImg;
     if (img) delete img;
 
-    origImg = new Image(filename);
-    img = new Image(filename);
-
-    origImgLabel->setImage(origImg);
-    imgLabel->setImage(img);
+    origImg = new Image(filename, "Original image");
+    img = new Image(filename, "Edited image");
 
     controls->setDisabled(false);
     adjustSize();
 
     // Adjust windows position
     int origImgX = X_MARGIN, origImgY = Y_MARGIN;
-    int origImgW = origImgLabel->width(), origImgH = origImgLabel->height();
+    int origImgW = origImg->window()->width(), origImgH = origImg->window()->height();
 
     int imgX = 2*X_MARGIN + origImgW, imgY = Y_MARGIN;
-    int imgW = imgLabel->width(), imgH = imgLabel->height();
+    int imgW = img->window()->width(), imgH = img->window()->height();
 
     int controlsX = imgX + imgW + X_MARGIN, controlsY = Y_MARGIN;
     int controlsW = this->width(), controlsH = this->height();
 
-    origImgLabel->setGeometry(origImgX, origImgY, origImgW, origImgH);
-    imgLabel->setGeometry(imgX, imgY, imgW, imgH);
+    origImg->window()->setGeometry(origImgX, origImgY, origImgW, origImgH);
+    img->window()->setGeometry(imgX, imgY, imgW, imgH);
     this->setGeometry(controlsX, controlsY, controlsW, controlsH);
 }
 
@@ -96,32 +85,32 @@ void MainWindow::saveImg() {
 
 void MainWindow::copyOriginalImg() {
     img->copy(origImg);
-    imgLabel->render();
+    img->render();
 }
 
 void MainWindow::hflipImg() {
     img->flipHorizontally();
-    imgLabel->render();
+    img->render();
 }
 
 void MainWindow::vflipImg() {
     img->flipVertically();
-    imgLabel->render();
+    img->render();
 }
 
 void MainWindow::grayscaleImg() {
     img->toGrayScale();
-    imgLabel->render();
+    img->render();
 }
 
 void MainWindow::quantizeImg(int n) {
     img->quantize(n);
-    imgLabel->render();
+    img->render();
 }
 
 void MainWindow::showImgHistogram() {
     int *histogram = img->grayscaleHistogram();
-    imgLabel->render();
+    img->render();
 
     for (int i = 0; i < 256; i++) {
         cout << i << ":" << histogram[i] << endl;

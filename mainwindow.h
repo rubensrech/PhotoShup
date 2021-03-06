@@ -3,7 +3,7 @@
 
 #include "controlswrapper.h"
 #include "image.h"
-#include "imagelabel.h"
+#include "imagewindow.h"
 
 #include <QMainWindow>
 #include <QLabel>
@@ -22,9 +22,6 @@ private:
     Ui::MainWindow *ui;
 
     ControlsWrapper *controls;
-
-    ImageLabel *imgLabel;
-    ImageLabel *origImgLabel;
 
     Image *img = nullptr;
     Image *origImg = nullptr;

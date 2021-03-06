@@ -6,10 +6,15 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#include <QPixmap>
-
 #include <iostream>
 using namespace std;
+
+#include <QPixmap>
+#include <QGuiApplication>
+#include <QScreen>
+
+#define DEFAULT -1
+#define MAX_SIZE_SCALE_FACTOR 0.7
 
 void Image::free() {
     if (this->isEmpty()) { return; }
@@ -59,12 +64,60 @@ void Image::copy(Image *img) {
     isGrayscale = false;
 }
 
+void Image::render() {
+    if (!window()) { return; }
+
+    int w = width(), h = height(), c = channels();
+
+    // Create QImage
+    QImage qimg(getData(), w, h, w*c, QImage::Format_RGB888);
+
+    // Define dimensions and resize if needed
+    QRect screenRect = QGuiApplication::primaryScreen()->geometry();
+    int MAX_W = screenRect.width() * MAX_SIZE_SCALE_FACTOR;
+    int MAX_H = screenRect.height() * MAX_SIZE_SCALE_FACTOR;
+    int pixmapWidth = DEFAULT, pixmapHeight = DEFAULT;
+
+    if (w > MAX_W && h > MAX_H) {
+        if (w/MAX_W > h/MAX_H) {
+            pixmapWidth = MAX_W;
+        } else {
+            pixmapHeight = MAX_H;
+        }
+    } else if (w > MAX_W) {
+        pixmapWidth = MAX_W;
+    } else if (h > MAX_H) {
+        pixmapHeight = MAX_H;
+    }
+
+    QPixmap pixmap;
+    if (pixmapWidth == DEFAULT && pixmapHeight == DEFAULT) {
+        pixmap = QPixmap::fromImage(qimg);
+    } else if (pixmapWidth != DEFAULT) {
+        pixmap = QPixmap::fromImage(qimg).scaledToWidth(pixmapWidth);
+    } else if (pixmapHeight != DEFAULT) {
+        pixmap = QPixmap::fromImage(qimg).scaledToHeight(pixmapHeight);
+    }
+
+//    window()->setFixedSize(QSize(pixmap.width(), pixmap.height()));
+    window()->setPixmap(pixmap);
+    window()->show();
+    window()->adjustSize();
+}
+
 Image::Image(const char *filename) {
     this->load(filename);
 }
 
+Image::Image(const char *filename, QString windowTitle): Image(filename) {
+    this->_window = new ImageWindow(windowTitle);
+    render();
+}
+
 Image::~Image() {
     this->free();
+
+    if (this->_window) delete this->_window;
 }
 
 // > Image processing

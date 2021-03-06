@@ -11,7 +11,7 @@ CONFIG += c++11
 SOURCES += \
     controlswrapper.cpp \
     image.cpp \
-    imagelabel.cpp \
+    imagewindow.cpp \
     main.cpp \
     mainwindow.cpp \
     pixel.cpp
@@ -19,7 +19,7 @@ SOURCES += \
 HEADERS += \
     controlswrapper.h \
     image.h \
-    imagelabel.h \
+    imagewindow.h \
     mainwindow.h \
     pixel.h \
     stb_image.h \

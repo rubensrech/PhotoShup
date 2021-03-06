@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "image.h"
 
 #include <QApplication>
 #include <QLabel>
