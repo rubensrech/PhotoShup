@@ -2,10 +2,12 @@
 
 #include <QFileDialog>
 #include <QGroupBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 
 #define DFT_SPACING 5
+#define DFT_MARGIN  5
 
 ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
 
@@ -16,6 +18,7 @@ ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
     QGroupBox *imgFileGroup = new QGroupBox("Image File", this);
     QVBoxLayout *imgFileGroupLayout = new QVBoxLayout(imgFileGroup);
     imgFileGroupLayout->setSpacing(DFT_SPACING);
+    imgFileGroupLayout->setMargin(DFT_MARGIN);
     imgFileGroup->setLayout(imgFileGroupLayout);
     layout->addWidget(imgFileGroup);
 
@@ -34,6 +37,7 @@ ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
     QGroupBox *imgProcessGroup = new QGroupBox("Image Processing", this);
     QVBoxLayout *imgProcessGroupLayout = new QVBoxLayout(imgProcessGroup);
     imgProcessGroupLayout->setSpacing(DFT_SPACING);
+    imgProcessGroupLayout->setMargin(DFT_MARGIN);
     imgProcessGroup->setLayout(imgProcessGroupLayout);
     layout->addWidget(imgProcessGroup);
 
@@ -61,17 +65,35 @@ ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
     connect(grayscaleButton, &QPushButton::clicked, this, &ControlsWrapper::grayscaleClicked);
     disablingControls.push_back(grayscaleButton);
 
-    // 2.5. Quantize button
-    quantizeValBox = new QSpinBox(imgProcessGroup);
+    // 2.5. Quantization group
+    QGroupBox *quantGroup = new QGroupBox("Quantization", imgProcessGroup);
+    QVBoxLayout *quantGroupLayout = new QVBoxLayout(quantGroup);
+    quantGroupLayout->setSpacing(DFT_SPACING);
+    quantGroupLayout->setMargin(DFT_MARGIN);
+    quantGroup->setLayout(quantGroupLayout);
+    imgProcessGroupLayout->addWidget(quantGroup);
+    // 2.5.1. Quantization row
+    QWidget *quantRow = new QWidget(quantGroup);
+    QHBoxLayout *quantRowLayout = new QHBoxLayout(quantRow);
+    quantRowLayout->setSpacing(DFT_SPACING);
+    quantRowLayout->setMargin(DFT_MARGIN);
+    quantRow->setLayout(quantRowLayout);
+    quantGroupLayout->addWidget(quantRow);
+    // 2.5.1.1. Quantization label
+    QLabel *quantLabel = new QLabel("Colors: ", quantGroup);
+    quantRowLayout->addWidget(quantLabel);
+    // 2.5.1.2. Quantization spin box
+    quantizeValBox = new QSpinBox(quantGroup);
     quantizeValBox->setRange(0, 256);
     quantizeValBox->setSingleStep(10);
     quantizeValBox->setValue(256);
-    imgProcessGroupLayout->addWidget(quantizeValBox);
+    quantRowLayout->addWidget(quantizeValBox);
     disablingControls.push_back(quantizeValBox);
-    QPushButton *quantizeButton = new QPushButton("Quantize", imgProcessGroup);
-    imgProcessGroupLayout->addWidget(quantizeButton);
-    connect(quantizeButton, &QPushButton::clicked, this, &ControlsWrapper::handleQuantizeClicked);
-    disablingControls.push_back(quantizeButton);
+    // 2.5.2. Quantization button
+    QPushButton *quantButton = new QPushButton("Quantize", quantGroup);
+    quantGroupLayout->addWidget(quantButton);
+    connect(quantButton, &QPushButton::clicked, this, &ControlsWrapper::handleQuantizeClicked);
+    disablingControls.push_back(quantButton);
 
     // 2.6. Histogram button
     QPushButton *histogramButton = new QPushButton("Histogram", imgProcessGroup);
