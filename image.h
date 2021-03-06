@@ -64,6 +64,8 @@ public:
     void toGrayScale();
     bool quantize(int n);
 
+    int *grayscaleHistogram();
+
 };
 
 #endif // IMAGE_H

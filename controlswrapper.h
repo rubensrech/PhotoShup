@@ -25,24 +25,20 @@ public:
 
 public slots:
     // > Button event handlers
+
     void handleOpenClicked();
-    void handleCopyClicked();
-    void handleHFlipClicked();
-    void handleVFlipClicked();
-    void handleGrayscaleClicked();
     void handleQuantizeClicked();
-    void handleSaveClicked();
 
 
 signals:
     void imgFileSelected(const char *filename);
+    void saveClicked();
     void copyClicked();
     void hflipClicked();
     void vflipClicked();
     void grayscaleClicked();
     void quantizeClicked(int n);
-    void saveClicked();
-
+    void histogramClicked();
 
 };
 

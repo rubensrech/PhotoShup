@@ -153,3 +153,25 @@ bool Image::quantize(int n) {
     return true;
 }
 
+int* Image::grayscaleHistogram() {
+    if (isEmpty()) { return nullptr; }
+    if (!isGrayscale) {
+        this->toGrayScale();
+    }
+
+    int *histogram = new int[256];
+
+    for (int i = 0; i < 256; i++) {
+        histogram[i] = 0;
+    }
+
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            histogram[pixel(x,y).red()]++;
+        }
+    }
+
+    return histogram;
+}
+
+

@@ -36,13 +36,13 @@ private:
 
 private slots:
     void openImgFile(const char *filename);
+    void saveImg();
+    void copyOriginalImg();
     void hflipImg();
     void vflipImg();
     void grayscaleImg();
     void quantizeImg(int n);
-    void copyOriginalImg();
-    void saveImg();
-
+    void showImgHistogram();
 
 public:
     MainWindow(const char *filename = nullptr);

@@ -23,12 +23,13 @@ MainWindow::MainWindow(const char *filename):
 
     controls = new ControlsWrapper(centralWidget);
     connect(controls, &ControlsWrapper::imgFileSelected, this, &MainWindow::openImgFile);
+    connect(controls, &ControlsWrapper::saveClicked, this, &MainWindow::saveImg);
+    connect(controls, &ControlsWrapper::copyClicked, this, &MainWindow::copyOriginalImg);
     connect(controls, &ControlsWrapper::hflipClicked, this, &MainWindow::hflipImg);
     connect(controls, &ControlsWrapper::vflipClicked, this, &MainWindow::vflipImg);
     connect(controls, &ControlsWrapper::grayscaleClicked, this, &MainWindow::grayscaleImg);
     connect(controls, &ControlsWrapper::quantizeClicked, this, &MainWindow::quantizeImg);
-    connect(controls, &ControlsWrapper::copyClicked, this, &MainWindow::copyOriginalImg);
-    connect(controls, &ControlsWrapper::saveClicked, this, &MainWindow::saveImg);
+    connect(controls, &ControlsWrapper::histogramClicked, this, &MainWindow::showImgHistogram);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -85,6 +86,19 @@ void MainWindow::openImgFile(const char *filename) {
     this->setGeometry(controlsX, controlsY, controlsW, controlsH);
 }
 
+void MainWindow::saveImg() {
+    QString origFilename = QString::fromStdString(img->getFilename());
+    QString filename = QFileDialog::getSaveFileName(this, "Save image", origFilename);
+    if (!filename.isEmpty() && !filename.isNull()) {
+        img->save(filename.toStdString().c_str());
+    }
+}
+
+void MainWindow::copyOriginalImg() {
+    img->copy(origImg);
+    imgLabel->render();
+}
+
 void MainWindow::hflipImg() {
     img->flipHorizontally();
     imgLabel->render();
@@ -105,18 +119,19 @@ void MainWindow::quantizeImg(int n) {
     imgLabel->render();
 }
 
-void MainWindow::copyOriginalImg() {
-    img->copy(origImg);
+void MainWindow::showImgHistogram() {
+    int *histogram = img->grayscaleHistogram();
     imgLabel->render();
+
+    for (int i = 0; i < 256; i++) {
+        cout << i << ":" << histogram[i] << endl;
+    }
+
+    delete histogram;
+
+    cout << "Free:" << histogram << endl;
 }
 
-void MainWindow::saveImg() {
-    QString origFilename = QString::fromStdString(img->getFilename());
-    QString filename = QFileDialog::getSaveFileName(this, "Save image", origFilename);
-    if (!filename.isEmpty() && !filename.isNull()) {
-        img->save(filename.toStdString().c_str());
-    }
-}
 
 void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *bar) {
     // Quit application when MainWindow (controls) is closed
