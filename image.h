@@ -1,6 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "histogram.h"
 #include "imagewindow.h"
 #include "pixel.h"
 
@@ -75,7 +76,7 @@ public:
     void flipVertically();
     void toGrayScale();
     bool quantize(int n);
-    int *grayscaleHistogram();
+    Histogram grayscaleHistogram();
 
 };
 

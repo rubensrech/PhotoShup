@@ -36,8 +36,7 @@ MainWindow::MainWindow(const char *filename):
     this->adjustSize();
 
     if (filename) {
-        origImg = new Image(filename, "Original image");
-        img = new Image(filename, "Edited image");
+        openImgFile(filename);
     } else {
         controls->setDisabled(true);
     }
@@ -109,16 +108,9 @@ void MainWindow::quantizeImg(int n) {
 }
 
 void MainWindow::showImgHistogram() {
-    int *histogram = img->grayscaleHistogram();
+    Histogram histogram = img->grayscaleHistogram();
     img->render();
-
-    for (int i = 0; i < 256; i++) {
-        cout << i << ":" << histogram[i] << endl;
-    }
-
-    delete histogram;
-
-    cout << "Free:" << histogram << endl;
+    histogram.show();
 }
 
 

@@ -117,7 +117,6 @@ void Image::render() {
     window()->setFixedSize(QSize(pixmap.width(), pixmap.height()));
     window()->setPixmap(pixmap);
     window()->show();
-//    window()->adjustSize();
 }
 
 // > Image processing
@@ -204,15 +203,11 @@ bool Image::quantize(int n) {
     return true;
 }
 
-int* Image::grayscaleHistogram() {
-    if (isEmpty()) { return nullptr; }
+Histogram Image::grayscaleHistogram() {
+    Histogram histogram;
+
+    if (isEmpty()) { return histogram; }
     if (!_isGrayscale) { toGrayScale(); }
-
-    int *histogram = new int[256];
-
-    for (int i = 0; i < 256; i++) {
-        histogram[i] = 0;
-    }
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {

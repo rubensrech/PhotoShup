@@ -2,6 +2,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QT       += charts
+
 CONFIG += c++11
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -10,6 +12,7 @@ CONFIG += c++11
 
 SOURCES += \
     controlswrapper.cpp \
+    histogram.cpp \
     image.cpp \
     imagewindow.cpp \
     main.cpp \
@@ -18,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
     controlswrapper.h \
+    histogram.h \
     image.h \
     imagewindow.h \
     mainwindow.h \

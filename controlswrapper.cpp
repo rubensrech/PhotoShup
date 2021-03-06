@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#define DFT_SPACING 5
+
 ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -13,6 +15,7 @@ ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
     // 1. Image File group
     QGroupBox *imgFileGroup = new QGroupBox("Image File", this);
     QVBoxLayout *imgFileGroupLayout = new QVBoxLayout(imgFileGroup);
+    imgFileGroupLayout->setSpacing(DFT_SPACING);
     imgFileGroup->setLayout(imgFileGroupLayout);
     layout->addWidget(imgFileGroup);
 
@@ -30,6 +33,7 @@ ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
     // 2. Image Processing group
     QGroupBox *imgProcessGroup = new QGroupBox("Image Processing", this);
     QVBoxLayout *imgProcessGroupLayout = new QVBoxLayout(imgProcessGroup);
+    imgProcessGroupLayout->setSpacing(DFT_SPACING);
     imgProcessGroup->setLayout(imgProcessGroupLayout);
     layout->addWidget(imgProcessGroup);
 
