@@ -9,8 +9,6 @@ class ImageLabel : public QLabel {
 
 private:
     Image *img;
-    int pixmapWidth;
-    int pixmapHeight;
 
 public:
     ImageLabel(QWidget *parent, Image *img = nullptr);

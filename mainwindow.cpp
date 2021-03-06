@@ -1,4 +1,4 @@
-#include "imagelabel.h"
+﻿#include "imagelabel.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -10,7 +10,8 @@
 using namespace std;
 
 #define CONTROLS_WIDTH 200
-#define MIN_HEIGHT 340
+#define X_MARGIN 50
+#define Y_MARGIN 80
 
 MainWindow::MainWindow(const char *filename):
     QMainWindow(), ui(new Ui::MainWindow) {
@@ -22,7 +23,7 @@ MainWindow::MainWindow(const char *filename):
     QHBoxLayout *layout = new QHBoxLayout(centralWidget);
 
     origImgLabel = new ImageLabel("Original image");
-    imgLabel = new ImageLabel(centralWidget);
+    imgLabel = new ImageLabel("Edited image");
 
     // - Buttons wrapper
     QWidget *buttonsWrapper = new QWidget(centralWidget);
@@ -84,20 +85,18 @@ MainWindow::MainWindow(const char *filename):
     buttonsWrapperLayout->addWidget(saveButton);
     controls.push_back(saveButton);
 
-    layout->addWidget(this->imgLabel);
     layout->addWidget(buttonsWrapper);
 
     this->setCentralWidget(centralWidget);
+    this->adjustSize();
 
     if (filename) {
         origImg = new Image(filename);
         img = new Image(filename);
-
         origImgLabel->setImage(origImg);
         imgLabel->setImage(img);
     } else {
-        setControlsDisabled(true);
-        setFixedSize(QSize(CONTROLS_WIDTH+40, MIN_HEIGHT));
+        this->setControlsDisabled(true);
     }
 }
 
@@ -105,6 +104,7 @@ MainWindow::~MainWindow() {
     delete ui;
 
     if (origImgLabel) delete origImgLabel;
+    if (imgLabel) delete imgLabel;
 
     if (img) delete img;
     if (origImg) delete origImg;
@@ -163,7 +163,25 @@ void MainWindow::handleOpenClicked() {
         imgLabel->setImage(img);
 
         setControlsDisabled(false);
-        int h = (imgLabel->height()+51 < MIN_HEIGHT) ? MIN_HEIGHT : imgLabel->height()+51;
-        setFixedSize(QSize(imgLabel->width()+CONTROLS_WIDTH+56, h));
+        adjustSize();
+
+        // Adjust windows position
+        int origImgX = X_MARGIN, origImgY = Y_MARGIN;
+        int origImgW = origImgLabel->width(), origImgH = origImgLabel->height();
+
+        int imgX = 2*X_MARGIN + origImgW, imgY = Y_MARGIN;
+        int imgW = imgLabel->width(), imgH = imgLabel->height();
+
+        int controlsX = imgX + imgW + X_MARGIN, controlsY = Y_MARGIN;
+        int controlsW = this->width(), controlsH = this->height();
+
+        origImgLabel->setGeometry(origImgX, origImgY, origImgW, origImgH);
+        imgLabel->setGeometry(imgX, imgY, imgW, imgH);
+        this->setGeometry(controlsX, controlsY, controlsW, controlsH);
     }
+}
+
+void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *bar) {
+    // Quit application when MainWindow (controls) is closed
+    QApplication::quit();
 }

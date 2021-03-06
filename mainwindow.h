@@ -42,6 +42,8 @@ private:
     void handleSaveClicked();
     void handleOpenClicked();
 
+    void closeEvent(QCloseEvent *bar);
+
 public:
     MainWindow(const char *filename = nullptr);
     ~MainWindow();
