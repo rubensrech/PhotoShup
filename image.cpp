@@ -13,8 +13,9 @@ using namespace std;
 #include <QGuiApplication>
 #include <QScreen>
 
+#define CLAMP_RENDER_DIMENSIONS true
+#define MAX_SIZE_SCALE_FACTOR   0.7
 #define DEFAULT -1
-#define MAX_SIZE_SCALE_FACTOR 0.7
 
 void Image::free() {
     if (this->isEmpty()) { return; }
@@ -137,6 +138,7 @@ void Image::render() {
     QImage qimg(data(), w, h, w*c, QImage::Format_RGB888);
 
     // Define dimensions and resize if needed
+#if CLAMP_RENDER_DIMENSIONS
     QRect screenRect = QGuiApplication::primaryScreen()->geometry();
     int MAX_W = screenRect.width() * MAX_SIZE_SCALE_FACTOR;
     int MAX_H = screenRect.height() * MAX_SIZE_SCALE_FACTOR;
@@ -153,8 +155,10 @@ void Image::render() {
     } else if (h > MAX_H) {
         pixmapHeight = MAX_H;
     }
+#endif
 
     QPixmap pixmap;
+#if CLAMP_RENDER_DIMENSIONS
     if (pixmapWidth == DEFAULT && pixmapHeight == DEFAULT) {
         pixmap = QPixmap::fromImage(qimg);
     } else if (pixmapWidth != DEFAULT) {
@@ -162,6 +166,9 @@ void Image::render() {
     } else if (pixmapHeight != DEFAULT) {
         pixmap = QPixmap::fromImage(qimg).scaledToHeight(pixmapHeight);
     }
+#else
+    pixmap = QPixmap::fromImage(qimg);
+#endif
 
     window()->setFixedSize(QSize(pixmap.width(), pixmap.height()));
     window()->setPixmap(pixmap);

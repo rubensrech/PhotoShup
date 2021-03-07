@@ -6,11 +6,12 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
+#include <algorithm>
 #include <iostream>
 using namespace std;
 
-#define X_MARGIN 50
-#define Y_MARGIN 80
+#define X_MARGIN 30
+#define Y_MARGIN 50
 
 MainWindow::MainWindow(const char *filename):
     QMainWindow(), ui(new Ui::MainWindow) {
@@ -67,18 +68,21 @@ void MainWindow::openImgFile(const char *filename) {
     adjustSize();
 
     // Adjust windows position
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+
     int origImgX = X_MARGIN, origImgY = Y_MARGIN;
-    int origImgW = origImg->window()->width(), origImgH = origImg->window()->height();
+    int origImgW = origImg->window()->width();
 
-    int imgX = origImgX + origImgW + X_MARGIN/2, imgY = Y_MARGIN;
-    int imgW = img->window()->width(), imgH = img->window()->height();
+    int imgX = min(origImgX + origImgW + X_MARGIN/2, screen.width() - X_MARGIN);
+    int imgY = Y_MARGIN;
+    int imgW = img->window()->width();
 
-    int controlsX = imgX + imgW + X_MARGIN/2, controlsY = Y_MARGIN;
-    int controlsW = this->width(), controlsH = this->height();
+    int controlsX = min(imgX + imgW + X_MARGIN/2, screen.width() - X_MARGIN);
+    int controlsY = Y_MARGIN;
 
-    origImg->window()->setGeometry(origImgX, origImgY, origImgW, origImgH);
-    img->window()->setGeometry(imgX, imgY, imgW, imgH);
-    this->setGeometry(controlsX, controlsY, controlsW, controlsH);
+    origImg->window()->move(origImgX, origImgY);
+    img->window()->move(imgX, imgY);
+    this->move(controlsX, controlsY);
 }
 
 void MainWindow::saveImg() {
@@ -136,19 +140,40 @@ void MainWindow::negativeImg() {
 }
 
 void MainWindow::equalizeHistogram() {
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+    ImageWindow *imgAfterWindow = img->window();
+
     // Display copy of the image before histogram equalization
-    new Image(img, "Image: Before equalization", true);
+    ImageWindow *imgBeforeWindow = (new Image(img, "Image: Before equalization", true))->window();
+
+    // Set the position of the image before histogram equalization
+    int imgBeforeX = min(imgAfterWindow->x() + imgAfterWindow->width() + X_MARGIN/2, screen.width() - X_MARGIN);
+    int imgBeforeY = min(imgAfterWindow->y(), screen.height() - Y_MARGIN);
+    imgBeforeWindow->move(imgBeforeX, imgBeforeY);
+
 
     bool isGrayscale = img->isGrayscale();
     if (isGrayscale) {
-        img->grayscaleHistogram().show("Histogram: Before equalization");
+        // Display histogram of the image before equalization
+        QChartView *hBefore = img->grayscaleHistogram().show("Histogram: Before equalization");
+
+        // Set the position of the histogram (before equalization)
+        int hBeforeX = imgBeforeWindow->x();
+        int hBeforeY = min(imgBeforeWindow->height() + imgBeforeWindow->y(), screen.width() - Y_MARGIN);
+        hBefore->move(hBeforeX, hBeforeY);
     }
 
     img->equalizeHistogram();
     img->render();
 
     if (isGrayscale) {
-        img->grayscaleHistogram().show("Histogram: After equalization");
+        // Display histogram of the image after equalization
+        QChartView *hAfter = img->grayscaleHistogram().show("Histogram: After equalization");
+
+        // Set the position of the histogram (after equalization)
+        int hAfterX = imgAfterWindow->x();
+        int hAfterY = min(imgAfterWindow->height() + imgAfterWindow->y(), screen.width() - Y_MARGIN);
+        hAfter->move(hAfterX, hAfterY);
     }
 }
 
