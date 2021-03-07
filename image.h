@@ -34,12 +34,17 @@ private:
 
 private:
     void free();
+    void buildPixelsMatrix();
     void load(const char *filename);
+    void createWindow(QString windowTitle, bool destroyOnClose = false);
 
 public:
     // > Constructors / Destructors
     Image(const char *filename);
     Image(const char *filename, QString windowTitle, bool destroyOnClose = false);
+
+    Image(Image *fromImg);
+    Image(Image *fromImg, QString windowTitle, bool destroyOnClose = false);
     ~Image();
 
 
@@ -54,6 +59,7 @@ public:
     ImageWindow *window() { return _window; }
 
     bool isEmpty() { return _data == NULL; }
+    bool isGrayscale() { return _isGrayscale; }
 
     unsigned char *data() { return _data; }
 
@@ -77,7 +83,7 @@ public:
     void flipVertically();
     void toGrayScale();
     void quantize(int n);
-    Histogram grayscaleHistogram(bool inplace = true);
+    Histogram grayscaleHistogram();
     void adjustBrightness(int brightness);
     void adjustContrast(double contrast);
     void toNegative();

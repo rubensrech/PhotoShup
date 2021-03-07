@@ -20,7 +20,6 @@ void Image::free() {
     if (this->isEmpty()) { return; }
 
     if (this->_window) {
-        this->_window->close();
         delete this->_window;
         this->_window = nullptr;
     }
@@ -36,38 +35,68 @@ void Image::free() {
     fprintf(stderr, "Destroying Image\n");
 }
 
+void Image::buildPixelsMatrix() {
+    _pxls.resize(width(), vector<Pixel>(height()));
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            _pxls[x][y] = Pixel(data(x, y));
+        }
+    }
+}
+
 void Image::load(const char *filename) {
     if (!this->isEmpty()) {
         this->free();
     }
 
-    this->_filename = string(filename);
-    this->_data = stbi_load(filename, &this->w, &this->h, &this->c, 0);
+    _filename = string(filename);
+    _data = stbi_load(filename, &w, &h, &c, 0);
 
-    this->_isGrayscale = c == 1;
+    _isGrayscale = channels() == 1;
 
-    this->_pxls.resize(this->w, vector<Pixel>(this->h));
-    for (int x = 0; x < this->width(); x++) {
-        for (int y = 0; y < this->height(); y++) {
-            this->_pxls[x][y] = Pixel(this->data(x, y));
-        }
-    }
+    buildPixelsMatrix();
+}
+
+void Image::createWindow(QString windowTitle, bool destroyOnClose) {
+    _window = new ImageWindow(windowTitle);
+
+    connect(_window, &ImageWindow::onClose, this, &Image::onClose);
+    if (destroyOnClose)
+        connect(_window, &ImageWindow::onClose, this, &Image::free);
+
+    render();
 }
 
 Image::Image(const char *filename) {
     load(filename);
 }
 
-Image::Image(const char *filename, QString windowTitle, bool destroyOnClose): Image(filename) {
-    _window = new ImageWindow(windowTitle);
+Image::Image(const char *filename, QString windowTitle, bool destroyOnClose):
+    Image(filename) {
+    createWindow(windowTitle, destroyOnClose);
+}
 
-    connect(_window, &ImageWindow::onClose, this, &Image::onClose);
+Image::Image(Image *fromImg) {
+    if (fromImg->isEmpty()) { return; }
 
-    if (destroyOnClose) {
-        connect(_window, &ImageWindow::onClose, this, &Image::free);
-    }
+    _filename = string(fromImg->filename());
 
-    render();
+    w = fromImg->width();
+    h = fromImg->height();
+    c = fromImg->channels();
+
+    size_t size = w*h*c * sizeof(unsigned char);
+    _data = (unsigned char*)malloc(size);
+    memcpy(_data, fromImg->data(), size);
+
+    _isGrayscale = fromImg->isGrayscale();
+
+    buildPixelsMatrix();
+}
+
+Image::Image(Image *fromImg, QString windowTitle, bool destroyOnClose):
+    Image(fromImg) {
+    createWindow(windowTitle, destroyOnClose);
 }
 
 Image::~Image() {
@@ -88,8 +117,15 @@ bool Image::save(const char *filename, int quality) {
 }
 
 void Image::copy(Image *img) {
-    memcpy(_data, img->_data, width()*height()*channels()*sizeof(unsigned char));
+    if (w != img->w || h != img->h || c != img->c) {
+        return;
+    }
+
+    memcpy(_data, img->data(), w*h*c * sizeof(unsigned char));
+
     _isGrayscale = false;
+    _minL = -1;
+    _maxL = -1;
 }
 
 void Image::render() {
@@ -214,7 +250,7 @@ void Image::quantize(int n) {
     }
 }
 
-Histogram Image::grayscaleHistogram(bool inplace) {
+Histogram Image::grayscaleHistogram() {
     Histogram histogram;
 
     if (isEmpty()) { return histogram; }
@@ -223,7 +259,6 @@ Histogram Image::grayscaleHistogram(bool inplace) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
             int L = p.luminance();
-            if (inplace) p.rgb(L, L, L);
             histogram[L]++;
         }
     }
@@ -271,7 +306,7 @@ void Image::toNegative() {
 }
 
 void Image::equalizeHistogram() {
-    Histogram histogram = grayscaleHistogram(false);
+    Histogram histogram = grayscaleHistogram();
     float a = 255.0 / (width() * height());
 
     // Compute cumulative histogram

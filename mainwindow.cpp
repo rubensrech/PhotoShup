@@ -115,8 +115,8 @@ void MainWindow::quantizeImg(int n) {
 }
 
 void MainWindow::showImgHistogram() {
-    Histogram histogram = img->grayscaleHistogram();
-    histogram.show();
+    img->toGrayScale();
+    img->grayscaleHistogram().show();
     img->render();
 }
 
@@ -136,9 +136,24 @@ void MainWindow::negativeImg() {
 }
 
 void MainWindow::equalizeHistogram() {
+    // Display copy of the image before histogram equalization
+    new Image(img, "Image: Before equalization", true);
+
+    bool isGrayscale = img->isGrayscale();
+    if (isGrayscale) {
+        img->grayscaleHistogram().show("Histogram: Before equalization");
+    }
+
     img->equalizeHistogram();
     img->render();
+
+    if (isGrayscale) {
+        img->grayscaleHistogram().show("Histogram: After equalization");
+    }
 }
+
+
+// > Close events
 
 void MainWindow::origImgWasClosed() {
     fprintf(stderr, "MainWindow: Original Image was closed\n");
@@ -146,7 +161,7 @@ void MainWindow::origImgWasClosed() {
 
 void MainWindow::editImgWasClosed() {
     fprintf(stderr, "MainWindow: Edit Image was closed\n");
-    QApplication::quit();
+     QApplication::quit();
 }
 
 void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *event) {
