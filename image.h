@@ -87,7 +87,9 @@ public:
     void adjustBrightness(int brightness);
     void adjustContrast(double contrast);
     void toNegative();
+    Histogram cumulativeGrayscaleHistogram();
     void equalizeHistogram();
+    void matchHistogramOf(Image *target);
 
 signals:
     void onClose();

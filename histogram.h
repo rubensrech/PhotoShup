@@ -33,6 +33,10 @@ public:
 
     int &operator[](int);
 
+    vector<int> asVector() { return _histogram; }
+
+    Histogram accumulateAndNormalize(float a);
+
     QChartView *show(QString title = "Grayscale Image Histogram");
 
 };

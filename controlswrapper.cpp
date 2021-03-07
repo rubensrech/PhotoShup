@@ -39,6 +39,33 @@ QWidget *ControlsWrapper::createImgFileControls(QWidget *parent) {
     return group;
 }
 
+QWidget *ControlsWrapper::createHistogramControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Histogram", parent);
+
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Show Histogram button
+    QPushButton *showHistButton = createButton("Show Histogram", group);
+    connect(showHistButton, &QPushButton::clicked, this, &ControlsWrapper::showHistogramClicked);
+    layout->addWidget(showHistButton);
+
+    // 2. Equalize Histogram button
+    QPushButton *eqHistButton = createButton("Equalize Histogram", group);
+    connect(eqHistButton, &QPushButton::clicked, this, &ControlsWrapper::equalizeHistogramClicked);
+    layout->addWidget(eqHistButton);
+
+    // 3. Match Histogram button
+    QPushButton *matchHistButton = createButton("Match Histogram", group);
+    connect(matchHistButton, &QPushButton::clicked, this, &ControlsWrapper::handleMatchHistogramClicked);
+    layout->addWidget(matchHistButton);
+
+    return group;
+}
+
 QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
     QGroupBox *group = new QGroupBox("Quantization", parent);
 
@@ -162,26 +189,23 @@ QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     connect(negativeButton, &QPushButton::clicked, this, &ControlsWrapper::negativeClicked);
     layout->addWidget(negativeButton);
 
-    // 6. Histogram button
-    QPushButton *histogramButton = createButton("Histogram", group);
-    connect(histogramButton, &QPushButton::clicked, this, &ControlsWrapper::histogramClicked);
-    layout->addWidget(histogramButton);
+    // 6. Histogram group
+    layout->addWidget(createHistogramControls(group));
 
-    // 7. Equalize Histogram button
-    QPushButton *eqHistButton = createButton("Equalize Histogram", group);
-    connect(eqHistButton, &QPushButton::clicked, this, &ControlsWrapper::equalizeHistogramClicked);
-    layout->addWidget(eqHistButton);
-
-    // 8. Quantization group
+    // 7. Quantization group
     layout->addWidget(createQuantizationControls(group));
 
-    // 9. Brightness group
+    // 8. Brightness group
     layout->addWidget(createBrightnessControls(group));
 
-    // 10. Constrast group
+    // 9. Constrast group
     layout->addWidget(createContrastControls(group));
 
     return group;
+}
+
+QString ControlsWrapper::selectImageFile(QString caption) {
+    return QFileDialog::getOpenFileName(this, caption, nullptr, "Images (*.jpg)");
 }
 
 ControlsWrapper::ControlsWrapper(QWidget *parent) : QWidget(parent) {
@@ -202,9 +226,16 @@ void ControlsWrapper::setDisabled(bool disabled) {
 }
 
 void ControlsWrapper::handleOpenClicked() {
-    QString filename = QFileDialog::getOpenFileName(this, "Open image", nullptr, "Images (*.jpg)");
+    QString filename = selectImageFile("Open image");
     if (!filename.isEmpty() && !filename.isNull()) {
-        emit imgFileSelected(filename.toStdString().c_str());
+        emit openClicked(filename.toStdString().c_str());
+    }
+}
+
+void ControlsWrapper::handleMatchHistogramClicked() {
+    QString filename = selectImageFile("Select image whose histogram should be matched");
+    if (!filename.isEmpty() && !filename.isNull()) {
+        emit matchHistogramClicked(filename.toStdString().c_str());
     }
 }
 

@@ -105,6 +105,8 @@ Image::~Image() {
 }
 
 bool Image::save(const char *filename, int quality) {
+    if (isEmpty()) return false;
+
     string f(filename);
     string ext = f.substr(f.find_last_of('.')+1);
     for_each(ext.begin(), ext.end(), [](char &c) { c = ::tolower(c); });
@@ -118,9 +120,8 @@ bool Image::save(const char *filename, int quality) {
 }
 
 void Image::copy(Image *img) {
-    if (w != img->w || h != img->h || c != img->c) {
-        return;
-    }
+    if (isEmpty()) return;
+    if (w != img->w || h != img->h || c != img->c) return;
 
     memcpy(_data, img->data(), w*h*c * sizeof(unsigned char));
 
@@ -130,7 +131,8 @@ void Image::copy(Image *img) {
 }
 
 void Image::render() {
-    if (!window()) { return; }
+    if (isEmpty()) return;
+    if (!window()) return;
 
     int w = width(), h = height(), c = channels();
 
@@ -178,6 +180,8 @@ void Image::render() {
 // > Image processing
 
 void Image::flipHorizontally() {
+    if (isEmpty()) return;
+
     int pixelSize = channels();
     unsigned char tmp[pixelSize];
     for (int x = 0; x < width()/2; x++) {
@@ -193,6 +197,8 @@ void Image::flipHorizontally() {
 }
 
 void Image::flipVertically() {
+    if (isEmpty()) return;
+
     int rowSize = channels() * width();
     unsigned char tmp[rowSize];
     for (int y = 0; y < height()/2; y++) {
@@ -260,7 +266,7 @@ void Image::quantize(int n) {
 Histogram Image::grayscaleHistogram() {
     Histogram histogram;
 
-    if (isEmpty()) { return histogram; }
+    if (isEmpty()) return histogram;
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
@@ -274,7 +280,7 @@ Histogram Image::grayscaleHistogram() {
 }
 
 void Image::adjustBrightness(int brightness) {
-    if (isEmpty()) { return; }
+    if (isEmpty()) return;
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
@@ -287,7 +293,7 @@ void Image::adjustBrightness(int brightness) {
 }
 
 void Image::adjustContrast(double contrast) {
-    if (isEmpty()) { return; }
+    if (isEmpty()) return;
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
@@ -300,7 +306,7 @@ void Image::adjustContrast(double contrast) {
 }
 
 void Image::toNegative() {
-    if (isEmpty()) { return; }
+    if (isEmpty()) return;
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
@@ -312,16 +318,17 @@ void Image::toNegative() {
     }
 }
 
-void Image::equalizeHistogram() {
+Histogram Image::cumulativeGrayscaleHistogram() {
     Histogram histogram = grayscaleHistogram();
     float a = 255.0 / (width() * height());
+    return histogram.accumulateAndNormalize(a);
+}
+
+void Image::equalizeHistogram() {
+    if (isEmpty()) return;
 
     // Compute cumulative histogram
-    vector<float> hist_cum(256, 0);
-    hist_cum[0] = a * (float)histogram[0];
-    for (int i = 1; i < 256; i++) {
-        hist_cum[i] = hist_cum[i-1] + a * (float)histogram[i];
-    }
+    Histogram hist_cum = cumulativeGrayscaleHistogram();
 
     // Use renormalized cumulative histogram of the Luminance channel for equalization
     for (int x = 0; x < width(); x++) {
@@ -330,6 +337,34 @@ void Image::equalizeHistogram() {
             for (int c = 0; c < channels(); c++) {
                 p.channel(c, hist_cum[p.channel(c)]);
             }
+        }
+    }
+}
+
+void Image::matchHistogramOf(Image *target) {
+    if (isEmpty()) return;
+
+    // First, convert both source and target images to grayscale
+    this->toGrayScale();
+    target->toGrayScale();
+
+    // Compute cumulative histogram for source and target images
+    Histogram Hsrc = this->cumulativeGrayscaleHistogram();
+    Histogram Htgt = target->cumulativeGrayscaleHistogram();
+
+    // Compute histogram matching function
+    // For each source shade find the target shade with most similar cumulative value
+    Histogram HM;
+    for (int shade = 0; shade < 256; shade++) {
+        HM[shade] = indexOfNearest(Htgt.asVector(), Hsrc[shade]);
+    }
+
+    // Apply histogram matching function to source image
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
+            int newL = HM[p.luminance()];
+            p.rgb(newL, newL, newL);
         }
     }
 }

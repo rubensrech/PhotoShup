@@ -12,6 +12,16 @@ int &Histogram::operator[](int index) {
     return _histogram[index];
 }
 
+Histogram Histogram::accumulateAndNormalize(float a) {
+    vector<float> hist_cum(256, 0);
+    hist_cum[0] = a * (float)_histogram[0];
+    for (int i = 1; i < 256; i++) {
+        hist_cum[i] = hist_cum[i-1] + a * (float)_histogram[i];
+    }
+
+    return Histogram(hist_cum);
+}
+
 QChartView *Histogram::show(QString title) {
     Histogram histogram = *this;
 

@@ -1,8 +1,7 @@
 #ifndef PIXEL_H
 #define PIXEL_H
 
-#include <algorithm>
-using namespace std;
+#include "util.h"
 
 enum Channel {
     Red = 0,
@@ -20,9 +19,6 @@ private:
     unsigned char *b;
 
 // > Methods
-
-private:
-    int clamp(int val, int lower = 0, int upper = 255) { return max(lower, min(val, upper)); }
 
 public:
     // > Constructors
@@ -45,9 +41,9 @@ public:
     int luminance() { return 0.299*red() + 0.587*green() + 0.114*blue(); }
 
     // > Setters
-    void red(int r)   { *this->r = clamp(r); }
-    void green(int g) { *this->g = clamp(g); }
-    void blue(int b)  { *this->b = clamp(b); }
+    void red(int r)   { *this->r = clamp(r, 0, 255); }
+    void green(int g) { *this->g = clamp(g, 0, 255); }
+    void blue(int b)  { *this->b = clamp(b, 0, 255); }
     void channel(int c, int v) {
         switch (c) {
         case 0: red(v); break;

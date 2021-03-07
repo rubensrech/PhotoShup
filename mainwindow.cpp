@@ -23,18 +23,19 @@ MainWindow::MainWindow(const char *filename):
     QHBoxLayout *layout = new QHBoxLayout(centralWidget);
 
     controls = new ControlsWrapper(centralWidget);
-    connect(controls, &ControlsWrapper::imgFileSelected, this, &MainWindow::openImgFile);
+    connect(controls, &ControlsWrapper::openClicked, this, &MainWindow::openImgFile);
     connect(controls, &ControlsWrapper::saveClicked, this, &MainWindow::saveImg);
     connect(controls, &ControlsWrapper::copyClicked, this, &MainWindow::copyOriginalImg);
     connect(controls, &ControlsWrapper::hflipClicked, this, &MainWindow::hflipImg);
     connect(controls, &ControlsWrapper::vflipClicked, this, &MainWindow::vflipImg);
     connect(controls, &ControlsWrapper::grayscaleClicked, this, &MainWindow::grayscaleImg);
     connect(controls, &ControlsWrapper::quantizeClicked, this, &MainWindow::quantizeImg);
-    connect(controls, &ControlsWrapper::histogramClicked, this, &MainWindow::showImgHistogram);
+    connect(controls, &ControlsWrapper::showHistogramClicked, this, &MainWindow::showImgHistogram);
     connect(controls, &ControlsWrapper::brightnessClicked, this, &MainWindow::adjustBrightness);
     connect(controls, &ControlsWrapper::contrastClicked, this, &MainWindow::adjustContrast);
     connect(controls, &ControlsWrapper::negativeClicked, this, &MainWindow::negativeImg);
     connect(controls, &ControlsWrapper::equalizeHistogramClicked, this, &MainWindow::equalizeHistogram);
+    connect(controls, &ControlsWrapper::matchHistogramClicked, this, &MainWindow::matchHistogram);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -176,6 +177,41 @@ void MainWindow::equalizeHistogram() {
         int hAfterY = min(imgAfterWindow->height() + imgAfterWindow->y(), screen.width() - Y_MARGIN);
         hAfter->move(hAfterX, hAfterY);
     }
+}
+
+void MainWindow::matchHistogram(const char *targetFilename) {
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+
+    // Load and show target image
+    Image *targetImg = new Image(targetFilename, "Image: Histogram Matching target", true);
+
+    // Set target image position
+    ImageWindow *targetImgWindow = targetImg->window();
+    ImageWindow *origImgWindow = origImg->window();
+    int targetImgX = origImgWindow->x(), targetImgY = origImgWindow->y();
+    targetImgWindow->move(targetImgX, targetImgY);
+
+    // Perform the histogram matching operation
+    img->matchHistogramOf(targetImg);
+
+    // Display target image histogram
+    QChartView *hTarget = targetImg->grayscaleHistogram().show("Histogram: Histogram Matching target");
+    // Set the position of target image histogram
+    int hTargetX = targetImgWindow->x();
+    int hTargetY = min(targetImgWindow->y() + targetImgWindow->height(), screen.width() - Y_MARGIN);
+    hTarget->move(hTargetX, hTargetY);
+
+    // Display source image histogram
+    QChartView *hSrc = img->grayscaleHistogram().show("Histogram: Histogram Matching source");
+    // Set the position of source image histogram
+    ImageWindow *srcImgWindow = img->window();
+    int hSrcX = srcImgWindow->x();
+    int hSrcY = min(srcImgWindow->y() + srcImgWindow->height(), screen.width() - Y_MARGIN);
+    hSrc->move(hSrcX, hSrcY);
+
+    // Re-render both images once they were converted to grayscale
+    img->render();
+    targetImg->render();
 }
 
 

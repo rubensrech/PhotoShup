@@ -44,6 +44,7 @@ private slots:
     void adjustContrast(double contrast);
     void negativeImg();
     void equalizeHistogram();
+    void matchHistogram(const char *targetFilename);
 
     void origImgWasClosed();
     void editImgWasClosed();

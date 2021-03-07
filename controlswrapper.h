@@ -27,10 +27,13 @@ private:
 
     QWidget *createImgFileControls(QWidget *parent);
 
+    QWidget *createHistogramControls(QWidget *parent);
     QWidget *createQuantizationControls(QWidget *parent);
     QWidget *createBrightnessControls(QWidget *parent);
     QWidget *createContrastControls(QWidget *parent);
     QWidget *createImgProcessingControls(QWidget *parent);
+
+    QString selectImageFile(QString caption);
 
 public:
     explicit ControlsWrapper(QWidget *parent = nullptr);
@@ -41,23 +44,25 @@ public slots:
     // > Button event handlers
 
     void handleOpenClicked();
+    void handleMatchHistogramClicked();
     void handleQuantizeClicked();
     void handleBrightnessClicked();
     void handleContrastClicked();
 
 signals:
-    void imgFileSelected(const char *filename);
+    void openClicked(const char *filename);
     void saveClicked();
     void copyClicked();
     void hflipClicked();
     void vflipClicked();
     void grayscaleClicked();
+    void negativeClicked();
+    void showHistogramClicked();
+    void equalizeHistogramClicked();
+    void matchHistogramClicked(const char *filename);
     void quantizeClicked(int n);
-    void histogramClicked();
     void brightnessClicked(int brightness);
     void contrastClicked(double contrast);
-    void negativeClicked();
-    void equalizeHistogramClicked();
 
 };
 
