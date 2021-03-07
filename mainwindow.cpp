@@ -141,16 +141,16 @@ void MainWindow::negativeImg() {
 
 void MainWindow::equalizeHistogram() {
     QRect screen = QGuiApplication::primaryScreen()->geometry();
-    ImageWindow *imgAfterWindow = img->window();
 
     // Display copy of the image before histogram equalization
+    // Memory is deallocated when window is closed
     ImageWindow *imgBeforeWindow = (new Image(img, "Image: Before equalization", true))->window();
 
     // Set the position of the image before histogram equalization
-    int imgBeforeX = min(imgAfterWindow->x() + imgAfterWindow->width() + X_MARGIN/2, screen.width() - X_MARGIN);
-    int imgBeforeY = min(imgAfterWindow->y(), screen.height() - Y_MARGIN);
+    ImageWindow *origImgWindow = origImg->window();
+    int imgBeforeX = origImgWindow->x();
+    int imgBeforeY = origImgWindow->y();
     imgBeforeWindow->move(imgBeforeX, imgBeforeY);
-
 
     bool isGrayscale = img->isGrayscale();
     if (isGrayscale) {
@@ -171,6 +171,7 @@ void MainWindow::equalizeHistogram() {
         QChartView *hAfter = img->grayscaleHistogram().show("Histogram: After equalization");
 
         // Set the position of the histogram (after equalization)
+        ImageWindow *imgAfterWindow = img->window();
         int hAfterX = imgAfterWindow->x();
         int hAfterY = min(imgAfterWindow->height() + imgAfterWindow->y(), screen.width() - Y_MARGIN);
         hAfter->move(hAfterX, hAfterY);
