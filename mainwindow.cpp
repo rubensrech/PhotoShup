@@ -33,6 +33,7 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::brightnessClicked, this, &MainWindow::adjustBrightness);
     connect(controls, &ControlsWrapper::contrastClicked, this, &MainWindow::adjustContrast);
     connect(controls, &ControlsWrapper::negativeClicked, this, &MainWindow::negativeImg);
+    connect(controls, &ControlsWrapper::equalizeHistogramClicked, this, &MainWindow::equalizeHistogram);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -58,6 +59,9 @@ void MainWindow::openImgFile(const char *filename) {
 
     origImg = new Image(filename, "Original image");
     img = new Image(filename, "Edited image");
+
+    connect(origImg, &Image::onClose, this, &MainWindow::origImgWasClosed);
+    connect(img, &Image::onClose, this, &MainWindow::editImgWasClosed);
 
     controls->setDisabled(false);
     adjustSize();
@@ -131,6 +135,19 @@ void MainWindow::negativeImg() {
     img->render();
 }
 
+void MainWindow::equalizeHistogram() {
+    img->equalizeHistogram();
+    img->render();
+}
+
+void MainWindow::origImgWasClosed() {
+    fprintf(stderr, "MainWindow: Original Image was closed\n");
+}
+
+void MainWindow::editImgWasClosed() {
+    fprintf(stderr, "MainWindow: Edit Image was closed\n");
+    QApplication::quit();
+}
 
 void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *event) {
     // Quit application when MainWindow (controls) is closed

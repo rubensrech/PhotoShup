@@ -9,7 +9,8 @@
 #include <string>
 using namespace std;
 
-class Image {
+class Image: public QObject {
+    Q_OBJECT
 
 // > Properties
 
@@ -38,7 +39,7 @@ private:
 public:
     // > Constructors / Destructors
     Image(const char *filename);
-    Image(const char *filename, QString windowTitle);
+    Image(const char *filename, QString windowTitle, bool destroyOnClose = false);
     ~Image();
 
 
@@ -76,10 +77,14 @@ public:
     void flipVertically();
     void toGrayScale();
     void quantize(int n);
-    Histogram grayscaleHistogram();
+    Histogram grayscaleHistogram(bool inplace = true);
     void adjustBrightness(int brightness);
     void adjustContrast(double contrast);
     void toNegative();
+    void equalizeHistogram();
+
+signals:
+    void onClose();
 
 };
 

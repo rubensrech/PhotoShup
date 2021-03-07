@@ -43,6 +43,10 @@ private slots:
     void adjustBrightness(int brightness);
     void adjustContrast(double contrast);
     void negativeImg();
+    void equalizeHistogram();
+
+    void origImgWasClosed();
+    void editImgWasClosed();
 
 public:
     MainWindow(const char *filename = nullptr);

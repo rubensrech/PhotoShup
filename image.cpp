@@ -19,6 +19,12 @@ using namespace std;
 void Image::free() {
     if (this->isEmpty()) { return; }
 
+    if (this->_window) {
+        this->_window->close();
+        delete this->_window;
+        this->_window = nullptr;
+    }
+
     stbi_image_free(this->_data);
     this->_data = NULL;
     this->_pxls.clear();
@@ -26,6 +32,8 @@ void Image::free() {
     this->_isGrayscale = false;
     this->_maxL = -1;
     this->_minL = -1;
+
+    fprintf(stderr, "Destroying Image\n");
 }
 
 void Image::load(const char *filename) {
@@ -50,15 +58,20 @@ Image::Image(const char *filename) {
     load(filename);
 }
 
-Image::Image(const char *filename, QString windowTitle): Image(filename) {
+Image::Image(const char *filename, QString windowTitle, bool destroyOnClose): Image(filename) {
     _window = new ImageWindow(windowTitle);
+
+    connect(_window, &ImageWindow::onClose, this, &Image::onClose);
+
+    if (destroyOnClose) {
+        connect(_window, &ImageWindow::onClose, this, &Image::free);
+    }
+
     render();
 }
 
 Image::~Image() {
     this->free();
-
-    if (this->_window) delete this->_window;
 }
 
 bool Image::save(const char *filename, int quality) {
@@ -159,7 +172,7 @@ void Image::toGrayScale() {
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
-            int L = 0.299*p.red() + 0.587*p.green() + 0.114*p.blue();
+            int L = p.luminance();
             p.rgb(L, L, L);
 
             if (L > _maxL) { _maxL = L; }
@@ -201,15 +214,17 @@ void Image::quantize(int n) {
     }
 }
 
-Histogram Image::grayscaleHistogram() {
+Histogram Image::grayscaleHistogram(bool inplace) {
     Histogram histogram;
 
     if (isEmpty()) { return histogram; }
-    if (!_isGrayscale) { toGrayScale(); }
 
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
-            histogram[pixel(x,y).red()]++;
+            Pixel p = pixel(x, y);
+            int L = p.luminance();
+            if (inplace) p.rgb(L, L, L);
+            histogram[L]++;
         }
     }
 
@@ -251,6 +266,28 @@ void Image::toNegative() {
             p.red(255- p.red());
             p.blue(255 - p.blue());
             p.green(255 - p.green());
+        }
+    }
+}
+
+void Image::equalizeHistogram() {
+    Histogram histogram = grayscaleHistogram(false);
+    float a = 255.0 / (width() * height());
+
+    // Compute cumulative histogram
+    vector<float> hist_cum(256, 0);
+    hist_cum[0] = a * (float)histogram[0];
+    for (int i = 1; i < 256; i++) {
+        hist_cum[i] = hist_cum[i-1] + a * (float)histogram[i];
+    }
+
+    // Use renormalized cumulative histogram of the Luminance channel for equalization
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
+            for (int c = 0; c < channels(); c++) {
+                p.channel(c, hist_cum[p.channel(c)]);
+            }
         }
     }
 }

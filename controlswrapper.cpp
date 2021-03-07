@@ -157,23 +157,28 @@ QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     connect(grayscaleButton, &QPushButton::clicked, this, &ControlsWrapper::grayscaleClicked);
     layout->addWidget(grayscaleButton);
 
-    // 5. Histogram button
-    QPushButton *histogramButton = createButton("Histogram", group);
-    connect(histogramButton, &QPushButton::clicked, this, &ControlsWrapper::histogramClicked);
-    layout->addWidget(histogramButton);
-
-    // 6. Negative button
+    // 5. Negative button
     QPushButton *negativeButton = createButton("Negative", group);
     connect(negativeButton, &QPushButton::clicked, this, &ControlsWrapper::negativeClicked);
     layout->addWidget(negativeButton);
 
-    // 7. Quantization group
+    // 6. Histogram button
+    QPushButton *histogramButton = createButton("Histogram", group);
+    connect(histogramButton, &QPushButton::clicked, this, &ControlsWrapper::histogramClicked);
+    layout->addWidget(histogramButton);
+
+    // 7. Equalize Histogram button
+    QPushButton *eqHistButton = createButton("Equalize Histogram", group);
+    connect(eqHistButton, &QPushButton::clicked, this, &ControlsWrapper::equalizeHistogramClicked);
+    layout->addWidget(eqHistButton);
+
+    // 8. Quantization group
     layout->addWidget(createQuantizationControls(group));
 
-    // 8. Brightness group
+    // 9. Brightness group
     layout->addWidget(createBrightnessControls(group));
 
-    // 9. Constrast group
+    // 10. Constrast group
     layout->addWidget(createContrastControls(group));
 
     return group;

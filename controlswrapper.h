@@ -57,6 +57,7 @@ signals:
     void brightnessClicked(int brightness);
     void contrastClicked(double contrast);
     void negativeClicked();
+    void equalizeHistogramClicked();
 
 };
 

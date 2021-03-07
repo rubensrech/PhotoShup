@@ -9,6 +9,7 @@ using namespace std;
 
 #include <QChartView>
 
+class Histogram;
 class Histogram {
 
 // > Properties
@@ -21,10 +22,18 @@ private:
 
 public:
     Histogram();
+    ~Histogram();
+
+    template<typename T>
+    Histogram(vector<T> v): Histogram() {
+        for (int i = 0; i < 256; i++) {
+            (*this)[i] = v[i];
+        }
+    }
 
     int &operator[](int);
 
-    void show(QString title = "Grayscale Image Histogram");
+    QChartView *show(QString title = "Grayscale Image Histogram");
 
 };
 

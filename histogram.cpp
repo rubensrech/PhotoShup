@@ -4,11 +4,15 @@ Histogram::Histogram() {
     _histogram = vector<int>(256, 0);
 }
 
+Histogram::~Histogram() {
+    fprintf(stderr, "Destroying Histogram\n");
+}
+
 int &Histogram::operator[](int index) {
     return _histogram[index];
 }
 
-void Histogram::show(QString title) {
+QChartView *Histogram::show(QString title) {
     Histogram histogram = *this;
 
     QBarSet *set = new QBarSet("Count");
@@ -44,5 +48,6 @@ void Histogram::show(QString title) {
     chartView->setMinimumSize(QSize(500, 400));
     chartView->setRenderHint(QPainter::Antialiasing);
     chartView->show();
-}
 
+    return chartView;
+}
