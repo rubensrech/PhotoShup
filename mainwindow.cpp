@@ -132,7 +132,7 @@ void MainWindow::negativeImg() {
 }
 
 
-void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *bar) {
+void MainWindow::closeEvent(__attribute__((unused)) QCloseEvent *event) {
     // Quit application when MainWindow (controls) is closed
     QApplication::quit();
 }

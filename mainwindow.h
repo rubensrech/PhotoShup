@@ -29,7 +29,7 @@ private:
 // > Methods
 
 private:
-    void closeEvent(QCloseEvent *bar);
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void openImgFile(const char *filename);
