@@ -40,6 +40,9 @@ private slots:
     void grayscaleImg();
     void quantizeImg(int n);
     void showImgHistogram();
+    void adjustBrightness(int brightness);
+    void adjustContrast(double contrast);
+    void negativeImg();
 
 public:
     MainWindow(const char *filename = nullptr);

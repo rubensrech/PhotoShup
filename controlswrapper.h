@@ -5,6 +5,7 @@
 using namespace std;
 
 #include <QPushButton>
+#include <QSlider>
 #include <QSpinBox>
 #include <QWidget>
 
@@ -16,6 +17,8 @@ class ControlsWrapper : public QWidget {
 private:
     vector<QWidget*> disablingControls;
     QSpinBox *quantizeValBox;
+    QSlider *brightnessSlider;
+    QDoubleSpinBox *contrastValBox;
 
 // > Methods
 
@@ -25,6 +28,8 @@ private:
     QWidget *createImgFileControls(QWidget *parent);
 
     QWidget *createQuantizationControls(QWidget *parent);
+    QWidget *createBrightnessControls(QWidget *parent);
+    QWidget *createContrastControls(QWidget *parent);
     QWidget *createImgProcessingControls(QWidget *parent);
 
 public:
@@ -37,7 +42,8 @@ public slots:
 
     void handleOpenClicked();
     void handleQuantizeClicked();
-
+    void handleBrightnessClicked();
+    void handleContrastClicked();
 
 signals:
     void imgFileSelected(const char *filename);
@@ -48,6 +54,9 @@ signals:
     void grayscaleClicked();
     void quantizeClicked(int n);
     void histogramClicked();
+    void brightnessClicked(int brightness);
+    void contrastClicked(double contrast);
+    void negativeClicked();
 
 };
 

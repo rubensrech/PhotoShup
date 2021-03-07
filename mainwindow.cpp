@@ -30,6 +30,9 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::grayscaleClicked, this, &MainWindow::grayscaleImg);
     connect(controls, &ControlsWrapper::quantizeClicked, this, &MainWindow::quantizeImg);
     connect(controls, &ControlsWrapper::histogramClicked, this, &MainWindow::showImgHistogram);
+    connect(controls, &ControlsWrapper::brightnessClicked, this, &MainWindow::adjustBrightness);
+    connect(controls, &ControlsWrapper::contrastClicked, this, &MainWindow::adjustContrast);
+    connect(controls, &ControlsWrapper::negativeClicked, this, &MainWindow::negativeImg);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -63,10 +66,10 @@ void MainWindow::openImgFile(const char *filename) {
     int origImgX = X_MARGIN, origImgY = Y_MARGIN;
     int origImgW = origImg->window()->width(), origImgH = origImg->window()->height();
 
-    int imgX = 2*X_MARGIN + origImgW, imgY = Y_MARGIN;
+    int imgX = origImgX + origImgW + X_MARGIN/2, imgY = Y_MARGIN;
     int imgW = img->window()->width(), imgH = img->window()->height();
 
-    int controlsX = imgX + imgW + X_MARGIN, controlsY = Y_MARGIN;
+    int controlsX = imgX + imgW + X_MARGIN/2, controlsY = Y_MARGIN;
     int controlsW = this->width(), controlsH = this->height();
 
     origImg->window()->setGeometry(origImgX, origImgY, origImgW, origImgH);
@@ -109,8 +112,23 @@ void MainWindow::quantizeImg(int n) {
 
 void MainWindow::showImgHistogram() {
     Histogram histogram = img->grayscaleHistogram();
-    img->render();
     histogram.show();
+    img->render();
+}
+
+void MainWindow::adjustBrightness(int brightness) {
+    img->adjustBrightness(brightness);
+    img->render();
+}
+
+void MainWindow::adjustContrast(double contrast) {
+    img->adjustContrast(contrast);
+    img->render();
+}
+
+void MainWindow::negativeImg() {
+    img->toNegative();
+    img->render();
 }
 
 

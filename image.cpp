@@ -170,8 +170,8 @@ void Image::toGrayScale() {
     _isGrayscale = true;
 }
 
-bool Image::quantize(int n) {
-    if (isEmpty()) { return false; }
+void Image::quantize(int n) {
+    if (isEmpty()) { return; }
     if (!_isGrayscale) { toGrayScale(); }
 
     int range = _maxL - _minL + 1;
@@ -199,8 +199,6 @@ bool Image::quantize(int n) {
             }
         }
     }
-
-    return true;
 }
 
 Histogram Image::grayscaleHistogram() {
@@ -218,4 +216,41 @@ Histogram Image::grayscaleHistogram() {
     return histogram;
 }
 
+void Image::adjustBrightness(int brightness) {
+    if (isEmpty()) { return; }
 
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
+            p.red(p.red() + brightness);
+            p.blue(p.blue() + brightness);
+            p.green(p.green() + brightness);
+        }
+    }
+}
+
+void Image::adjustContrast(double contrast) {
+    if (isEmpty()) { return; }
+
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
+            p.red((double)p.red() * contrast);
+            p.blue((double)p.blue() * contrast);
+            p.green((double)p.green() * contrast);
+        }
+    }
+}
+
+void Image::toNegative() {
+    if (isEmpty()) { return; }
+
+    for (int x = 0; x < width(); x++) {
+        for (int y = 0; y < height(); y++) {
+            Pixel p = pixel(x, y);
+            p.red(255- p.red());
+            p.blue(255 - p.blue());
+            p.green(255 - p.green());
+        }
+    }
+}

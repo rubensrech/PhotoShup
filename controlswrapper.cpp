@@ -33,7 +33,7 @@ QWidget *ControlsWrapper::createImgFileControls(QWidget *parent) {
 
     // 2. Save button
     QPushButton *saveButton = createButton("Save", this);
-    connect(openButton, &QPushButton::clicked, this, &ControlsWrapper::saveClicked);
+    connect(saveButton, &QPushButton::clicked, this, &ControlsWrapper::saveClicked);
     layout->addWidget(saveButton);
 
     return group;
@@ -50,11 +50,9 @@ QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
 
     // 1. Quantization row
     QWidget *row = new QWidget(group);
-
     QHBoxLayout *rowLayout = new QHBoxLayout(row);
     rowLayout->setSpacing(DFT_SPACING);
     rowLayout->setMargin(DFT_MARGIN);
-
     row->setLayout(rowLayout);
     layout->addWidget(row);
 
@@ -78,6 +76,57 @@ QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
     return group;
 }
 
+QWidget *ControlsWrapper::createBrightnessControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Brightness", parent);
+
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Brightness slider
+    brightnessSlider = new QSlider(group);
+    brightnessSlider->setOrientation(Qt::Horizontal);
+    brightnessSlider->setRange(-255, 255);
+    brightnessSlider->setTickPosition(QSlider::TicksBelow);
+    brightnessSlider->setTickInterval(255);
+    layout->addWidget(brightnessSlider);
+    disablingControls.push_back(brightnessSlider);
+
+    // 2. Brightness button
+    QPushButton *button = createButton("Adjust brightness", group);
+    connect(button, &QPushButton::clicked, this, &ControlsWrapper::handleBrightnessClicked);
+    layout->addWidget(button);
+
+    return group;
+}
+
+QWidget *ControlsWrapper::createContrastControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Contrast", parent);
+
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Contrast double spin box
+    contrastValBox = new QDoubleSpinBox(group);
+    contrastValBox->setRange(0.1, 255.0);
+    contrastValBox->setSingleStep(0.1);
+    contrastValBox->setValue(1.0);
+    contrastValBox->setDecimals(1);
+    layout->addWidget(contrastValBox);
+    disablingControls.push_back(contrastValBox);
+
+    // 2. Contrast button
+    QPushButton *button = createButton("Adjust constrast", group);
+    connect(button, &QPushButton::clicked, this, &ControlsWrapper::handleContrastClicked);
+    layout->addWidget(button);
+
+    return group;
+}
 
 QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     QGroupBox *group = new QGroupBox("Image Processing", parent);
@@ -108,13 +157,24 @@ QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     connect(grayscaleButton, &QPushButton::clicked, this, &ControlsWrapper::grayscaleClicked);
     layout->addWidget(grayscaleButton);
 
-    // 5. Quantization group
-    layout->addWidget(createQuantizationControls(group));
-
-    // 6. Histogram button
+    // 5. Histogram button
     QPushButton *histogramButton = createButton("Histogram", group);
     connect(histogramButton, &QPushButton::clicked, this, &ControlsWrapper::histogramClicked);
     layout->addWidget(histogramButton);
+
+    // 6. Negative button
+    QPushButton *negativeButton = createButton("Negative", group);
+    connect(negativeButton, &QPushButton::clicked, this, &ControlsWrapper::negativeClicked);
+    layout->addWidget(negativeButton);
+
+    // 7. Quantization group
+    layout->addWidget(createQuantizationControls(group));
+
+    // 8. Brightness group
+    layout->addWidget(createBrightnessControls(group));
+
+    // 9. Constrast group
+    layout->addWidget(createContrastControls(group));
 
     return group;
 }
@@ -146,5 +206,15 @@ void ControlsWrapper::handleOpenClicked() {
 void ControlsWrapper::handleQuantizeClicked() {
     int n = quantizeValBox->value();
     emit quantizeClicked(n);
+}
+
+void ControlsWrapper::handleBrightnessClicked() {
+    int brightness = brightnessSlider->value();
+    emit brightnessClicked(brightness);
+}
+
+void ControlsWrapper::handleContrastClicked() {
+    double contrast = contrastValBox->value();
+    emit contrastClicked(contrast);
 }
 
