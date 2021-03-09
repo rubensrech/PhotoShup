@@ -36,6 +36,7 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::negativeClicked, this, &MainWindow::negativeImg);
     connect(controls, &ControlsWrapper::equalizeHistogramClicked, this, &MainWindow::equalizeHistogram);
     connect(controls, &ControlsWrapper::matchHistogramClicked, this, &MainWindow::matchHistogram);
+    connect(controls, &ControlsWrapper::rotateClockwiseClicked, this, &MainWindow::rotateClockwise);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -149,8 +150,8 @@ void MainWindow::equalizeHistogram() {
 
     // Set the position of the image before histogram equalization
     ImageWindow *origImgWindow = origImg->window();
-    int imgBeforeX = origImgWindow->x();
-    int imgBeforeY = origImgWindow->y();
+    int imgBeforeX = origImgWindow->x() + 10;
+    int imgBeforeY = origImgWindow->y() + 10;
     imgBeforeWindow->move(imgBeforeX, imgBeforeY);
 
     bool isGrayscale = img->isGrayscale();
@@ -212,6 +213,11 @@ void MainWindow::matchHistogram(const char *targetFilename) {
     // Re-render both images once they were converted to grayscale
     img->render();
     targetImg->render();
+}
+
+void MainWindow::rotateClockwise() {
+    img->rotateClockwise();
+    img->render();
 }
 
 

@@ -31,6 +31,7 @@ private:
     QWidget *createQuantizationControls(QWidget *parent);
     QWidget *createBrightnessControls(QWidget *parent);
     QWidget *createContrastControls(QWidget *parent);
+    QWidget *createRotationControls(QWidget *parent);
     QWidget *createImgProcessingControls(QWidget *parent);
 
     QString selectImageFile(QString caption);
@@ -63,6 +64,7 @@ signals:
     void quantizeClicked(int n);
     void brightnessClicked(int brightness);
     void contrastClicked(double contrast);
+    void rotateClockwiseClicked();
 
 };
 

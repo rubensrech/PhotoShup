@@ -38,6 +38,14 @@ private:
     void load(const char *filename);
     void createWindow(QString windowTitle, bool destroyOnClose = false);
 
+    /*
+     * Calculates the position of the channel `c` of a pixel (x,y)
+     * in an image of size H x W and `C` channels
+     */
+    static int dataIndex(int W, int H, int C, int x, int y, int c = 0) {
+        return C * (y*W + x) + c;
+    }
+
 public:
     // > Constructors / Destructors
     Image(const char *filename);
@@ -71,7 +79,7 @@ public:
 
     string extension() { return filename().substr(filename().find_last_of(".")+1); }
 
-    unsigned char *data(int x, int y, int c = 0) { return (!isEmpty()) ? &data()[this->c*(y*w + x) + c] : NULL; }
+    unsigned char *data(int x, int y, int c = 0) { return (!isEmpty()) ? &data()[dataIndex(w,h,this->c,x,y,c)] : NULL; }
     unsigned char *row(int y) { return data(0, y); }
 
     int scaledWidth(int h) { return width()*h/height(); };
@@ -90,6 +98,7 @@ public:
     Histogram cumulativeGrayscaleHistogram();
     void equalizeHistogram();
     void matchHistogramOf(Image *target);
+    void rotateClockwise();
 
 signals:
     void onClose();

@@ -247,7 +247,7 @@ void Image::quantize(int n) {
         for (int x = 0; x < width(); x++) {
             for (int y = 0; y < height(); y++) {
                 Pixel p = pixel(x, y);
-                int L = p.red();
+                int L = p.luminance();
                 // Calculate `index` of the L value
                 int iL = L - minL;
                 // Calculate `index` of the bin to which the L value should be mapped to
@@ -367,4 +367,31 @@ void Image::matchHistogramOf(Image *target) {
             p.rgb(newL, newL, newL);
         }
     }
+}
+
+void Image::rotateClockwise() {
+    if (isEmpty()) return;
+
+    // in : [H][W]
+    // out: [W][H]
+    int inW = this->w, inH = this->h;
+    int outW = inH, outH = inW;
+    unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
+
+    for (int y = 0; y < inH; y++) {
+        for (int x = 0; x < inW; x++) {
+            // in[y][x] -> out[h-1-y][x]
+            int inX = x, inY = y;
+            int outX = inH-1 - inY, outY = inX;
+            Pixel outPixel(&out[dataIndex(outW, outH, c, outX, outY)]);
+            outPixel.copy(this->pixel(x, y));
+        }
+    }
+
+    this->w = outW;
+    this->h = outH;
+    stbi_image_free(this->_data);
+    this->_data = out;
+
+    buildPixelsMatrix();
 }

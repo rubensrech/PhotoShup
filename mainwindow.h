@@ -45,6 +45,7 @@ private slots:
     void negativeImg();
     void equalizeHistogram();
     void matchHistogram(const char *targetFilename);
+    void rotateClockwise();
 
     void origImgWasClosed();
     void editImgWasClosed();

@@ -16,8 +16,7 @@ SOURCES += \
     image.cpp \
     imagewindow.cpp \
     main.cpp \
-    mainwindow.cpp \
-    pixel.cpp
+    mainwindow.cpp
 
 HEADERS += \
     controlswrapper.h \
