@@ -32,7 +32,7 @@ private:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void openImgFile(const char *filename);
+    bool openImgFile(const char *filename);
     void saveImg();
     void copyOriginalImg();
     void hflipImg();

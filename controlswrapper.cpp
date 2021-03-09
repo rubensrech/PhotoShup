@@ -156,7 +156,7 @@ QWidget *ControlsWrapper::createContrastControls(QWidget *parent) {
 }
 
 QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
-    QGroupBox *group = new QGroupBox("Rotation", parent);
+    QGroupBox *group = new QGroupBox("Rotate", parent);
 
     QVBoxLayout *layout = new QVBoxLayout(group);
     layout->setSpacing(DFT_SPACING);
@@ -164,10 +164,15 @@ QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
 
     group->setLayout(layout);
 
-    // 1. Rotate Clockwise button
-    QPushButton *rotClkwiseButton = createButton("Rotate clockwise", group);
-    connect(rotClkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::rotateClockwiseClicked);
-    layout->addWidget(rotClkwiseButton);
+    // 1. Clockwise button
+    QPushButton *clkwiseButton = createButton("Clockwise", group);
+    connect(clkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::rotateClockwiseClicked);
+    layout->addWidget(clkwiseButton);
+
+    // 2. Counter-clockwise button
+    QPushButton *counterClkwiseButton = createButton("Counter-clockwise", group);
+    connect(counterClkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::rotateCounterClockwiseClicked);
+    layout->addWidget(counterClkwiseButton);
 
     return group;
 }

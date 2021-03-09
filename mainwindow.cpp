@@ -21,6 +21,7 @@ MainWindow::MainWindow(const char *filename):
 
     QWidget *centralWidget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(centralWidget);
+    layout->setMargin(5);
 
     controls = new ControlsWrapper(centralWidget);
     connect(controls, &ControlsWrapper::openClicked, this, &MainWindow::openImgFile);
@@ -43,7 +44,10 @@ MainWindow::MainWindow(const char *filename):
     this->adjustSize();
 
     if (filename) {
-        openImgFile(filename);
+        if (!openImgFile(filename)) {
+            this->hide();
+            QMetaObject::invokeMethod(this, "close", Qt::QueuedConnection);
+        }
     } else {
         controls->setDisabled(true);
     }
@@ -56,7 +60,14 @@ MainWindow::~MainWindow() {
     if (origImg) delete origImg;
 }
 
-void MainWindow::openImgFile(const char *filename) {
+bool MainWindow::openImgFile(const char *filename) {
+    QFileInfo fileInfo(filename);
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        int ret = QMessageBox::critical(nullptr, "File not found",
+                                    "Could not open the image file because it was not found.");
+        return !ret;
+    }
+
     if (origImg) delete origImg;
     if (img) delete img;
 
@@ -75,16 +86,23 @@ void MainWindow::openImgFile(const char *filename) {
     int origImgX = X_MARGIN, origImgY = Y_MARGIN;
     int origImgW = origImg->window()->width();
 
-    int imgX = min(origImgX + origImgW + X_MARGIN/2, screen.width() - X_MARGIN);
-    int imgY = Y_MARGIN;
     int imgW = img->window()->width();
+    int imgX = min(origImgX + origImgW + X_MARGIN/2, screen.width() - imgW);
+    int imgY = Y_MARGIN;
 
-    int controlsX = min(imgX + imgW + X_MARGIN/2, screen.width() - X_MARGIN);
+    int controlsW = this->width();
+    int controlsX = min(imgX + imgW + X_MARGIN/2, screen.width() - controlsW);
     int controlsY = Y_MARGIN;
 
     origImg->window()->move(origImgX, origImgY);
     img->window()->move(imgX, imgY);
     this->move(controlsX, controlsY);
+
+    // Bring controls window to front
+    this->raise();
+    this->activateWindow();
+
+    return true;
 }
 
 void MainWindow::saveImg() {
@@ -160,8 +178,9 @@ void MainWindow::equalizeHistogram() {
         QChartView *hBefore = img->grayscaleHistogram().show("Histogram: Before equalization");
 
         // Set the position of the histogram (before equalization)
+        int hBeforeH = hBefore->height();
         int hBeforeX = imgBeforeWindow->x();
-        int hBeforeY = min(imgBeforeWindow->height() + imgBeforeWindow->y(), screen.width() - Y_MARGIN);
+        int hBeforeY = min(imgBeforeWindow->height() + imgBeforeWindow->y(), screen.height() - hBeforeH);
         hBefore->move(hBeforeX, hBeforeY);
     }
 
@@ -174,8 +193,9 @@ void MainWindow::equalizeHistogram() {
 
         // Set the position of the histogram (after equalization)
         ImageWindow *imgAfterWindow = img->window();
+        int hAfterH = hAfter->height();
         int hAfterX = imgAfterWindow->x();
-        int hAfterY = min(imgAfterWindow->height() + imgAfterWindow->y(), screen.width() - Y_MARGIN);
+        int hAfterY = min(imgAfterWindow->height() + imgAfterWindow->y(), screen.height() - hAfterH);
         hAfter->move(hAfterX, hAfterY);
     }
 }
@@ -198,16 +218,18 @@ void MainWindow::matchHistogram(const char *targetFilename) {
     // Display target image histogram
     QChartView *hTarget = targetImg->grayscaleHistogram().show("Histogram: Histogram Matching target");
     // Set the position of target image histogram
+    int hTargetH = hTarget->height();
     int hTargetX = targetImgWindow->x();
-    int hTargetY = min(targetImgWindow->y() + targetImgWindow->height(), screen.width() - Y_MARGIN);
+    int hTargetY = min(targetImgWindow->y() + targetImgWindow->height(), screen.height() - hTargetH);
     hTarget->move(hTargetX, hTargetY);
 
     // Display source image histogram
     QChartView *hSrc = img->grayscaleHistogram().show("Histogram: Histogram Matching source");
     // Set the position of source image histogram
     ImageWindow *srcImgWindow = img->window();
+    int hSrcH = hSrc->height();
     int hSrcX = srcImgWindow->x();
-    int hSrcY = min(srcImgWindow->y() + srcImgWindow->height(), screen.width() - Y_MARGIN);
+    int hSrcY = min(srcImgWindow->y() + srcImgWindow->height(), screen.height() - hSrcH);
     hSrc->move(hSrcX, hSrcY);
 
     // Re-render both images once they were converted to grayscale
@@ -218,6 +240,14 @@ void MainWindow::matchHistogram(const char *targetFilename) {
 void MainWindow::rotateClockwise() {
     img->rotateClockwise();
     img->render();
+
+    // Move controls window position
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+    ImageWindow *imgWindow = img->window();
+    int controlsW = this->width();
+    int controlsX = min(imgWindow->x() + imgWindow->width() + X_MARGIN/2, screen.width() - controlsW);
+    int controlsY = imgWindow->y();
+    this->move(controlsX, controlsY);
 }
 
 
