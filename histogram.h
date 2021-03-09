@@ -22,7 +22,6 @@ private:
 
 public:
     Histogram();
-    ~Histogram();
 
     template<typename T>
     Histogram(vector<T> v): Histogram() {

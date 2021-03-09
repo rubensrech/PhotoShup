@@ -4,10 +4,6 @@ Histogram::Histogram() {
     _histogram = vector<int>(256, 0);
 }
 
-Histogram::~Histogram() {
-    fprintf(stderr, "Destroying Histogram\n");
-}
-
 int &Histogram::operator[](int index) {
     return _histogram[index];
 }
