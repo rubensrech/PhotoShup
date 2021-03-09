@@ -5,6 +5,11 @@
 #include <algorithm>
 using namespace std;
 
+enum RotationDirection {
+    ClockWise,
+    CounterClockwise,
+};
+
 template<typename T>
 int indexOfNearest(vector<T> vec, T value) {
     typename vector<T>::iterator fst = vec.begin(), lst = vec.end();

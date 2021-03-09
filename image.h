@@ -43,6 +43,7 @@ private:
      * in an image of size H x W and `C` channels
      */
     static int dataIndex(int W, int H, int C, int x, int y, int c = 0) {
+        (void)H;
         return C * (y*W + x) + c;
     }
 
@@ -98,7 +99,7 @@ public:
     Histogram cumulativeGrayscaleHistogram();
     void equalizeHistogram();
     void matchHistogramOf(Image *target);
-    void rotateClockwise();
+    void rotate(RotationDirection direction);
 
 signals:
     void onClose();

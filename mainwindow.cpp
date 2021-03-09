@@ -37,7 +37,7 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::negativeClicked, this, &MainWindow::negativeImg);
     connect(controls, &ControlsWrapper::equalizeHistogramClicked, this, &MainWindow::equalizeHistogram);
     connect(controls, &ControlsWrapper::matchHistogramClicked, this, &MainWindow::matchHistogram);
-    connect(controls, &ControlsWrapper::rotateClockwiseClicked, this, &MainWindow::rotateClockwise);
+    connect(controls, &ControlsWrapper::rotateClicked, this, &MainWindow::rotate);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -237,8 +237,8 @@ void MainWindow::matchHistogram(const char *targetFilename) {
     targetImg->render();
 }
 
-void MainWindow::rotateClockwise() {
-    img->rotateClockwise();
+void MainWindow::rotate(RotationDirection direction) {
+    img->rotate(direction);
     img->render();
 
     // Move controls window position

@@ -166,12 +166,12 @@ QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
 
     // 1. Clockwise button
     QPushButton *clkwiseButton = createButton("Clockwise", group);
-    connect(clkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::rotateClockwiseClicked);
+    connect(clkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::handleRotateClockwiseClicked);
     layout->addWidget(clkwiseButton);
 
     // 2. Counter-clockwise button
     QPushButton *counterClkwiseButton = createButton("Counter-clockwise", group);
-    connect(counterClkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::rotateCounterClockwiseClicked);
+    connect(counterClkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::handleRotateCounterClockwiseClicked);
     layout->addWidget(counterClkwiseButton);
 
     return group;
@@ -277,5 +277,13 @@ void ControlsWrapper::handleBrightnessClicked() {
 void ControlsWrapper::handleContrastClicked() {
     double contrast = contrastValBox->value();
     emit contrastClicked(contrast);
+}
+
+void ControlsWrapper::handleRotateClockwiseClicked() {
+    emit rotateClicked(ClockWise);
+}
+
+void ControlsWrapper::handleRotateCounterClockwiseClicked() {
+    emit rotateClicked(CounterClockwise);
 }
 

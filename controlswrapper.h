@@ -1,6 +1,8 @@
 #ifndef CONTROLSWRAPPER_H
 #define CONTROLSWRAPPER_H
 
+#include "util.h"
+
 #include <vector>
 using namespace std;
 
@@ -49,6 +51,8 @@ public slots:
     void handleQuantizeClicked();
     void handleBrightnessClicked();
     void handleContrastClicked();
+    void handleRotateClockwiseClicked();
+    void handleRotateCounterClockwiseClicked();
 
 signals:
     void openClicked(const char *filename);
@@ -64,8 +68,7 @@ signals:
     void quantizeClicked(int n);
     void brightnessClicked(int brightness);
     void contrastClicked(double contrast);
-    void rotateClockwiseClicked();
-    void rotateCounterClockwiseClicked();
+    void rotateClicked(RotationDirection direction);
 
 };
 

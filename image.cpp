@@ -369,7 +369,7 @@ void Image::matchHistogramOf(Image *target) {
     }
 }
 
-void Image::rotateClockwise() {
+void Image::rotate(RotationDirection direction) {
     if (isEmpty()) return;
 
     // in : [H][W]
@@ -380,9 +380,19 @@ void Image::rotateClockwise() {
 
     for (int y = 0; y < inH; y++) {
         for (int x = 0; x < inW; x++) {
-            // in[y][x] -> out[h-1-y][x]
             int inX = x, inY = y;
-            int outX = inH-1 - inY, outY = inX;
+            int outX, outY;
+
+            if (direction == ClockWise) {
+                // in[y][x] -> out[h-1-y][x]
+                outX = inH-1 - inY;
+                outY = inX;
+            } else { // CounterClockwise
+                // in[y][x] -> out[w-1-x][y]
+                outX = inY;
+                outY = inW-1 - inX;
+            }
+
             Pixel outPixel(&out[dataIndex(outW, outH, c, outX, outY)]);
             outPixel.copy(this->pixel(x, y));
         }
