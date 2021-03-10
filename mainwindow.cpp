@@ -38,6 +38,8 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::equalizeHistogramClicked, this, &MainWindow::equalizeHistogram);
     connect(controls, &ControlsWrapper::matchHistogramClicked, this, &MainWindow::matchHistogram);
     connect(controls, &ControlsWrapper::rotateClicked, this, &MainWindow::rotate);
+    connect(controls, &ControlsWrapper::zoomOutClicked, this, &MainWindow::zoomOut);
+    connect(controls, &ControlsWrapper::zoomInClicked, this, &MainWindow::zoomIn);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -250,6 +252,15 @@ void MainWindow::rotate(RotationDirection direction) {
     this->move(controlsX, controlsY);
 }
 
+void MainWindow::zoomOut(int sx, int sy) {
+    img->zoomOut(sx, sy);
+    img->render();
+}
+
+void MainWindow::zoomIn() {
+    img->zoomIn();
+    img->render();
+}
 
 // > Close events
 

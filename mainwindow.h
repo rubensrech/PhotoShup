@@ -46,6 +46,8 @@ private slots:
     void equalizeHistogram();
     void matchHistogram(const char *targetFilename);
     void rotate(RotationDirection direction);
+    void zoomOut(int sx, int sy);
+    void zoomIn();
 
     void origImgWasClosed();
     void editImgWasClosed();

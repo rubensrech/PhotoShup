@@ -79,7 +79,7 @@ QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
     QWidget *row = new QWidget(group);
     QHBoxLayout *rowLayout = new QHBoxLayout(row);
     rowLayout->setSpacing(DFT_SPACING);
-    rowLayout->setMargin(DFT_MARGIN);
+    rowLayout->setMargin(0);
     row->setLayout(rowLayout);
     layout->addWidget(row);
 
@@ -177,6 +177,64 @@ QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
     return group;
 }
 
+QWidget *ControlsWrapper::createZoomControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Zoom", parent);
+
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Zoom out row
+    QWidget *row = new QWidget(group);
+    QHBoxLayout *rowLayout = new QHBoxLayout(row);
+    rowLayout->setSpacing(0);
+    rowLayout->setMargin(0);
+    row->setLayout(rowLayout);
+    layout->addWidget(row);
+
+    // 1.1. Sx label
+    QLabel *sxLabel = new QLabel("Sx: ", row);
+    rowLayout->addWidget(sxLabel);
+    // 1.2. Sx spin box
+    zoomOutSxValBox = new QSpinBox(row);
+    zoomOutSxValBox->setMinimum(1);
+    zoomOutSxValBox->setSingleStep(1);
+    zoomOutSxValBox->setValue(2);
+    rowLayout->addWidget(zoomOutSxValBox);
+    disablingControls.push_back(zoomOutSxValBox);
+
+    // 1.1. Sy label
+    QLabel *syLabel = new QLabel("Sy: ", row);
+    rowLayout->addWidget(syLabel);
+    // 1.2. Sy spin box
+    zoomOutSyValBox = new QSpinBox(row);
+    zoomOutSyValBox->setMinimum(1);
+    zoomOutSyValBox->setSingleStep(1);
+    zoomOutSyValBox->setValue(2);
+    rowLayout->addWidget(zoomOutSyValBox);
+    disablingControls.push_back(zoomOutSyValBox);
+
+    // 2. Zoom out button
+    QPushButton *zoomOutButton = createButton("Zoom out", group);
+    connect(zoomOutButton, &QPushButton::clicked, this, &ControlsWrapper::handleZoomOutClicked);
+    layout->addWidget(zoomOutButton);
+
+    // 3. Separator line
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
+    // 4. Zoom in button
+    QPushButton *zoomInButton = createButton("Zoom in 2x2", group);
+    connect(zoomInButton, &QPushButton::clicked, this, &ControlsWrapper::zoomInClicked);
+    layout->addWidget(zoomInButton);
+
+    return group;
+}
+
 QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     QGroupBox *group = new QGroupBox("Image Processing", parent);
 
@@ -225,6 +283,9 @@ QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
 
     // 10. Rotate group
     layout->addWidget(createRotationControls(group));
+
+    // 11. Zoom group
+    layout->addWidget(createZoomControls(group));
 
     return group;
 }
@@ -285,5 +346,11 @@ void ControlsWrapper::handleRotateClockwiseClicked() {
 
 void ControlsWrapper::handleRotateCounterClockwiseClicked() {
     emit rotateClicked(CounterClockwise);
+}
+
+void ControlsWrapper::handleZoomOutClicked() {
+    int sx = zoomOutSxValBox->value();
+    int sy = zoomOutSyValBox->value();
+    emit zoomOutClicked(sx, sy);
 }
 

@@ -21,6 +21,8 @@ private:
     QSpinBox *quantizeValBox;
     QSlider *brightnessSlider;
     QDoubleSpinBox *contrastValBox;
+    QSpinBox *zoomOutSxValBox;
+    QSpinBox *zoomOutSyValBox;
 
 // > Methods
 
@@ -34,6 +36,7 @@ private:
     QWidget *createBrightnessControls(QWidget *parent);
     QWidget *createContrastControls(QWidget *parent);
     QWidget *createRotationControls(QWidget *parent);
+    QWidget *createZoomControls(QWidget *parent);
     QWidget *createImgProcessingControls(QWidget *parent);
 
     QString selectImageFile(QString caption);
@@ -53,6 +56,7 @@ public slots:
     void handleContrastClicked();
     void handleRotateClockwiseClicked();
     void handleRotateCounterClockwiseClicked();
+    void handleZoomOutClicked();
 
 signals:
     void openClicked(const char *filename);
@@ -69,6 +73,8 @@ signals:
     void brightnessClicked(int brightness);
     void contrastClicked(double contrast);
     void rotateClicked(RotationDirection direction);
+    void zoomOutClicked(int sx, int sy);
+    void zoomInClicked();
 
 };
 
