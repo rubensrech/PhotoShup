@@ -100,6 +100,8 @@ public:
     void equalizeHistogram();
     void matchHistogramOf(Image *target);
     void rotate(RotationDirection direction);
+    void zoomOut(int sx, int sy);
+    void zoomIn();
 
 signals:
     void onClose();

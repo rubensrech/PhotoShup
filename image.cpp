@@ -37,7 +37,8 @@ void Image::free() {
 }
 
 void Image::buildPixelsMatrix() {
-    _pxls.resize(width(), vector<Pixel>(height()));
+    _pxls.clear();
+    _pxls.resize(width(), vector<Pixel>(height(), Pixel()));
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             _pxls[x][y] = Pixel(data(x, y));
@@ -374,7 +375,7 @@ void Image::rotate(RotationDirection direction) {
 
     // in : [H][W]
     // out: [W][H]
-    int inW = this->w, inH = this->h;
+    int inW = width(), inH = height();
     int outW = inH, outH = inW;
     unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
 
@@ -404,4 +405,93 @@ void Image::rotate(RotationDirection direction) {
     this->_data = out;
 
     buildPixelsMatrix();
+}
+
+void Image::zoomOut(int sx, int sy) {
+    if (isEmpty()) return;
+
+    int inW = width(), inH = height();
+    int outW = (inW+1)/sx, outH = (inH+1)/sy;
+    unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
+
+    for (int x = 0; x < inW; x += sx) {
+        for (int y = 0; y < inH; y += sy) {
+            int n = 0;
+            vector<int> rgbSum(c, 0);
+            for (int iX = 0; iX < sx; iX++) {
+                for (int iY = 0; iY < sy; iY++) {
+                    if (x+iX < inW && y+iY < inH) {
+                        Pixel inP = pixel(x+iX, y+iY);
+                        for (int iC = 0; iC < c; iC++)
+                            rgbSum[iC] += inP.channel(iC);
+                        n++;
+                    }
+                }
+            }
+
+            int outX = x/sx, outY = y/sy;
+            Pixel outPixel(&out[dataIndex(outW, outH, c, outX, outY)]);
+            for (int iC = 0; iC < c; iC++) {
+                int v = (n > 0) ? rgbSum[iC]/n : rgbSum[iC];
+                outPixel.channel(iC, v);
+            }
+        }
+    }
+
+    this->w = outW;
+    this->h = outH;
+    stbi_image_free(this->_data);
+    this->_data = out;
+
+    buildPixelsMatrix();
+}
+
+void Image::zoomIn() {
+    if (isEmpty()) return;
+
+    int inW = width(), inH = height();
+    int outW = 2*inW-1, outH = 2*inH-1;
+    unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
+
+    // Fill even rows of output image
+    for (int y = 0; y < inH; y++) {
+        for (int x = 0; x < outW; x++) {
+            Pixel outPixel(&out[dataIndex(outW, outH, c, x, y*2)]);
+            if (x % 2 == 0) {
+                // out[y*2][x] = in[y][x/2]
+                outPixel.copy(this->pixel(x/2, y));
+            } else {
+                // out[y*2][x] = (in[y][x/2] + in[y][(x+1)/2]) / 2
+                Pixel in0 = this->pixel(x/2, y);
+                Pixel in1 = this->pixel((x+1)/2, y);
+                for (int iC = 0; iC < c; iC++) {
+                    int v = (in0.channel(iC) + in1.channel(iC)) / 2;
+                    outPixel.channel(iC, v);
+                }
+            }
+        }
+    }
+
+    // Fill odd rows of the output image
+    for (int y = 1; y < outH; y += 2) {
+        for (int x = 0; x < outW; x++) {
+            // out[y][x] = (in[y/2][x/2] + in[(y+1)/2][x/2]) / 2
+            Pixel outPixel(&out[dataIndex(outW, outH, c, x, y)]);
+            Pixel in0 = this->pixel(x/2, y/2);
+            Pixel in1 = this->pixel(x/2, y/2);
+            for (int iC = 0; iC < c; iC++) {
+                int v = (in0.channel(iC) + in1.channel(iC)) / 2;
+                outPixel.channel(iC, v);
+            }
+        }
+    }
+
+    this->w = outW;
+    this->h = outH;
+    stbi_image_free(this->_data);
+    this->_data = out;
+
+    buildPixelsMatrix();
+
+    cout << "HERE" << endl;
 }
