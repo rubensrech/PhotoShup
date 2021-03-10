@@ -13,7 +13,7 @@ using namespace std;
 #include <QGuiApplication>
 #include <QScreen>
 
-#define CLAMP_RENDER_DIMENSIONS true
+#define CLAMP_RENDER_DIMENSIONS false
 #define MAX_SIZE_SCALE_FACTOR   0.7
 #define DEFAULT -1
 
@@ -37,8 +37,7 @@ void Image::free() {
 }
 
 void Image::buildPixelsMatrix() {
-    _pxls.clear();
-    _pxls.resize(width(), vector<Pixel>(height(), Pixel()));
+    _pxls = vector<vector<Pixel>>(width(), vector<Pixel>(height()));
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             _pxls[x][y] = Pixel(data(x, y));
@@ -411,7 +410,7 @@ void Image::zoomOut(int sx, int sy) {
     if (isEmpty()) return;
 
     int inW = width(), inH = height();
-    int outW = (inW+1)/sx, outH = (inH+1)/sy;
+    int outW = (inW+sx-1)/sx, outH = (inH+sy-1)/sy;
     unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
 
     for (int x = 0; x < inW; x += sx) {
@@ -492,6 +491,4 @@ void Image::zoomIn() {
     this->_data = out;
 
     buildPixelsMatrix();
-
-    cout << "HERE" << endl;
 }

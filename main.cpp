@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
-    MainWindow w("/Users/rubensrechjunior/Downloads/IMG_2710-small.jpg");
+    MainWindow w("/Users/rubensrechjunior/Downloads/FPI/IMG_2710-small.jpg");
     w.show();
 
     return a.exec();
