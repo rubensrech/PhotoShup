@@ -126,14 +126,14 @@ void Image::copy(Image *img) {
         memcpy(_data, img->_data, w*h*c * sizeof(unsigned char));
     } else {
         size_t size = img->w*img->h*img->c * sizeof(unsigned char);
-        unsigned char *data = (unsigned char*)malloc(size);
-        memcpy(_data, img->_data, size);
+        unsigned char *newData = (unsigned char*)malloc(size);
+        memcpy(newData, img->_data, size);
 
         this->w = img->w;
         this->h = img->h;
         this->c = img->c;
         stbi_image_free(this->_data);
-        this->_data = data;
+        this->_data = newData;
 
         buildPixelsMatrix();
     }
@@ -310,9 +310,7 @@ void Image::adjustContrast(double contrast) {
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
-            p.red((double)p.red() * contrast);
-            p.blue((double)p.blue() * contrast);
-            p.green((double)p.green() * contrast);
+            p *= contrast;
         }
     }
 }
@@ -323,7 +321,7 @@ void Image::toNegative() {
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
-            p.red(255- p.red());
+            p.red(255 - p.red());
             p.blue(255 - p.blue());
             p.green(255 - p.green());
         }
@@ -332,7 +330,7 @@ void Image::toNegative() {
 
 Histogram Image::cumulativeGrayscaleHistogram() {
     Histogram histogram = grayscaleHistogram(false);
-    double a = 255.0 / (width() * height());
+    double a = 255.0 / (double)(width() * height());
     return histogram.accumulateAndScale(a);
 }
 
@@ -406,7 +404,7 @@ void Image::rotate(RotationDirection direction) {
             }
 
             Pixel outPixel(&out[dataIndex(outW, outH, c, outX, outY)]);
-            outPixel.copy(this->pixel(x, y));
+            outPixel << this->pixel(x, y);
         }
     }
 
@@ -422,11 +420,13 @@ void Image::zoomOut(int sx, int sy) {
     if (isEmpty()) return;
 
     int inW = width(), inH = height();
+    // outW = ceil(inW/sx), outH = ceil(inH/sy);
     int outW = (inW+sx-1)/sx, outH = (inH+sy-1)/sy;
     unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
 
     for (int x = 0; x < inW; x += sx) {
         for (int y = 0; y < inH; y += sy) {
+
             int n = 0;
             vector<int> rgbSum(c, 0);
             for (int iX = 0; iX < sx; iX++) {
@@ -470,7 +470,7 @@ void Image::zoomIn() {
             Pixel outPixel(&out[dataIndex(outW, outH, c, x, y*2)]);
             if (x % 2 == 0) {
                 // out[y*2][x] = in[y][x/2]
-                outPixel.copy(this->pixel(x/2, y));
+                outPixel << this->pixel(x/2, y);
             } else {
                 // out[y*2][x] = (in[y][x/2] + in[y][(x+1)/2]) / 2
                 Pixel in0 = this->pixel(x/2, y);
@@ -483,13 +483,13 @@ void Image::zoomIn() {
         }
     }
 
-    // Fill odd rows of the output image
+    // Compute the odd rows of the output image
     for (int y = 1; y < outH; y += 2) {
         for (int x = 0; x < outW; x++) {
             // out[y][x] = (in[y/2][x/2] + in[(y+1)/2][x/2]) / 2
             Pixel outPixel(&out[dataIndex(outW, outH, c, x, y)]);
             Pixel in0 = this->pixel(x/2, y/2);
-            Pixel in1 = this->pixel(x/2, y/2);
+            Pixel in1 = this->pixel(x/2, (y+1)/2);
             for (int iC = 0; iC < c; iC++) {
                 int v = (in0.channel(iC) + in1.channel(iC)) / 2;
                 outPixel.channel(iC, v);

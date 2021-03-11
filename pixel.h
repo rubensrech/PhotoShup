@@ -73,11 +73,22 @@ public:
         blue(b);
     }
 
-    void copy(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
-
     // > Operators
     void operator+=(int v) { rgb(red()+v, green()+v, blue()+v); }
+    void operator*=(double a) { rgb(red()*a, green()*a, blue()*a); }
+    void operator<<(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
 
+    void operator<<(vector<int> rgb) {
+        for (int c = 0; c < 3; c++)
+            this->channel(c, rgb[c]);
+    }
+
+    vector<int> operator+(Pixel &p) {
+        vector<int> rgbSum(3, 0);
+        for (int c = 0; c < 3; c++)
+            rgbSum[c] = this->channel(c) + p.channel(c);
+        return rgbSum;
+    }
 
 };
 
