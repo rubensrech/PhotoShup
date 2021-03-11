@@ -118,6 +118,14 @@ void MainWindow::saveImg() {
 void MainWindow::copyOriginalImg() {
     img->copy(origImg);
     img->render();
+
+    // Reset img window position
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+    ImageWindow *origImgWindow = origImg->window();
+    ImageWindow *imgWindow = img->window();
+    int imgX = min(origImgWindow->x() + origImgWindow->width() + X_MARGIN/2, screen.width() - imgWindow->width());
+    int imgY = Y_MARGIN;
+    imgWindow->move(imgX, imgY);
 }
 
 void MainWindow::hflipImg() {

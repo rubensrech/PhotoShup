@@ -121,9 +121,22 @@ bool Image::save(const char *filename, int quality) {
 
 void Image::copy(Image *img) {
     if (isEmpty()) return;
-    if (w != img->w || h != img->h || c != img->c) return;
 
-    memcpy(_data, img->data(), w*h*c * sizeof(unsigned char));
+    if (w == img->w && h == img->h && c == img->c) {
+        memcpy(_data, img->_data, w*h*c * sizeof(unsigned char));
+    } else {
+        size_t size = img->w*img->h*img->c * sizeof(unsigned char);
+        unsigned char *data = (unsigned char*)malloc(size);
+        memcpy(_data, img->_data, size);
+
+        this->w = img->w;
+        this->h = img->h;
+        this->c = img->c;
+        stbi_image_free(this->_data);
+        this->_data = data;
+
+        buildPixelsMatrix();
+    }
 
     _isGrayscale = false;
     _minL = -1;
