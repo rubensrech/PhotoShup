@@ -32,6 +32,20 @@ T max_element(const vector<T>& vec) {
 
 // > Vector operators
 
+// - In-place
+
+template<typename vec_t, typename a_t>
+void operator*=(vector<vec_t>& vec, a_t alpha) {
+    for (int i = 0; i < vec.size(); i++)
+        vec[i] = (a_t)vec[i] * alpha;
+}
+
+template<typename vec_t, typename d_t>
+void operator/=(vector<vec_t>& vec, d_t d) {
+    for (int i = 0; i < vec.size(); i++)
+        vec[i] = (d_t)vec[i] / d;
+}
+
 template<typename vec_t, typename a_t>
 vector<vec_t> operator*(const vector<vec_t>& vec, a_t alpha) {
     vector<vec_t> resp(vec.size());
@@ -46,12 +60,6 @@ vector<vec_t> operator/(const vector<vec_t>& vec, d_t d) {
     for (int i = 0; i < vec.size(); i++)
         resp[i] = (d_t)vec[i] / d;
     return resp;
-}
-
-template<typename vec_t, typename a_t>
-void operator*=(vector<vec_t>& vec, a_t alpha) {
-    for (int i = 0; i < vec.size(); i++)
-        vec[i] = (a_t)vec[i] * alpha;
 }
 
 #endif // UTIL_H

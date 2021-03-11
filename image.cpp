@@ -426,17 +426,15 @@ void Image::zoomOut(int sx, int sy) {
 
     for (int x = 0; x < inW; x += sx) {
         for (int y = 0; y < inH; y += sy) {
-
-            int n = 0;
+            // out[y/sy][x/sx] = mean(in[y][x] : in[y+sy-1][x+sx-1])
             vector<int> rgbSum(c, 0);
-            for (int iX = 0; iX < sx; iX++) {
-                for (int iY = 0; iY < sy; iY++) {
-                    if (x+iX < inW && y+iY < inH) {
-                        Pixel inP = pixel(x+iX, y+iY);
-                        for (int iC = 0; iC < c; iC++)
-                            rgbSum[iC] += inP.channel(Channel(iC));
-                        n++;
-                    }
+            int n = 0;
+            for (int iX = x; iX < x+sx && iX < inW; iX++) {
+                for (int iY = y; iY < y+sy && iY < inH; iY++) {
+                    Pixel inP = pixel(x, y);
+                    for (int iC = 0; iC < c; iC++)
+                        rgbSum[iC] += inP.channel(Channel(iC));
+                    n++;
                 }
             }
 

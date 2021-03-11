@@ -32,7 +32,6 @@ public:
     Pixel() {};
     Pixel(unsigned char *data) { setData(data); }
 
-
     // > Getters
     int red()   { return r != NULL ? *r : -1; }
     int green() { return g != NULL ? *g : -1; }
@@ -76,7 +75,6 @@ public:
     void operator+=(int v) { rgb(red()+v, green()+v, blue()+v); }
     void operator*=(double a) { rgb(red()*a, green()*a, blue()*a); }
     void operator<<(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
-    void operator<<(vector<int> rgbVec) { rgb(rgbVec[0], rgbVec[1], rgbVec[2]); }
 
 };
 
