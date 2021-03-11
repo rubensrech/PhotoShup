@@ -28,7 +28,7 @@ public:
     template<typename T>
     Histogram(vector<T> v): Histogram() {
         for (int i = 0; i < 256; i++) {
-            (*this)[i] = v[i];
+            _histogram[i] = v[i];
         }
     }
 

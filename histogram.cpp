@@ -9,19 +9,12 @@ int &Histogram::operator[](int index) {
 }
 
 Histogram Histogram::scale(float a) {
-    vector<float> scaled_hist(_histogram.size());
-    for (int i = 0; i < 256; i++) {
-        scaled_hist[i] = (float)_histogram[i] * a;
-    }
-
-    return Histogram(scaled_hist);
+    _histogram *= a;
+    return *this;
 }
 
 Histogram Histogram::normalize(int newMax) {
-    int max = -1;
-    for (int i = 0; i < 256; i++) {
-        if (_histogram[i] > max) max = _histogram[i];
-    }
+    int max = max_element(_histogram);
     if (max <= 0) max = 1;
     float a = (float)newMax / (float)max;
     return scale(a);

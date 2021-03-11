@@ -37,4 +37,10 @@ void operator*=(vector<vec_t>& vec, a_t alpha) {
         vec[i] = (a_t)vec[i] * alpha;
 }
 
+template<typename T>
+T max_element(const vector<T>& vec) {
+    return *max_element(vec.begin(), vec.end());
+}
+
+
 #endif // UTIL_H
