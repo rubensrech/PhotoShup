@@ -23,4 +23,18 @@ T clamp(T val, T lower, T upper) {
     return max(lower, min(val, upper));
 }
 
+template<typename vec_t, typename a_t>
+vector<vec_t> operator*(const vector<vec_t>& vec, a_t alpha) {
+    vector<vec_t> resp(vec.size());
+    for (int i = 0; i < vec.size(); i++)
+        resp[i] = (a_t)resp[i] * alpha;
+    return resp;
+}
+
+template<typename vec_t, typename a_t>
+void operator*=(vector<vec_t>& vec, a_t alpha) {
+    for (int i = 0; i < vec.size(); i++)
+        vec[i] = (a_t)vec[i] * alpha;
+}
+
 #endif // UTIL_H

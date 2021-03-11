@@ -1,6 +1,8 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
+#include "util.h"
+
 #include <QtCharts>
 using namespace QtCharts;
 
@@ -21,8 +23,8 @@ private:
 // > Methods
 
 public:
+    // > Constructors
     Histogram();
-
     template<typename T>
     Histogram(vector<T> v): Histogram() {
         for (int i = 0; i < 256; i++) {
@@ -34,7 +36,9 @@ public:
 
     vector<int> asVector() { return _histogram; }
 
-    Histogram accumulateAndNormalize(float a);
+    Histogram scale(float a);
+    Histogram normalize(int newMax = 255);
+    Histogram accumulateAndScale(float a);
 
     QChartView *show(QString title = "Grayscale Image Histogram");
 
