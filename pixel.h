@@ -47,7 +47,13 @@ public:
         }
     };
 
-    int luminance() { return 0.299*red() + 0.587*green() + 0.114*blue(); }
+    /*
+     * Some extra precision was added to the weights,
+     * because both values 0.299 and 0.587 cannot be
+     * exactly represented in binary floating-point
+     * format
+     */
+    int luminance() { return 0.29900001*red() + 0.58700001*green() + 0.114*blue(); }
 
     // > Setters
     void red(int r)   { if (this->r != NULL) *this->r = clamp(r, 0, 255); }
@@ -62,14 +68,15 @@ public:
     }
 
     void rgb(int r, int g, int b) {
-        this->red(r);
-        this->green(g);
-        this->blue(b);
+        red(r);
+        green(g);
+        blue(b);
     }
 
-    void copy(Pixel p) {
-        this->rgb(p.red(), p.green(), p.blue());
-    }
+    void copy(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
+
+    // > Operators
+    void operator+=(int v) { rgb(red()+v, green()+v, blue()+v); }
 
 
 };

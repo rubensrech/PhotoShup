@@ -8,7 +8,7 @@ int &Histogram::operator[](int index) {
     return _histogram[index];
 }
 
-Histogram Histogram::scale(float a) {
+Histogram Histogram::scale(double a) {
     _histogram *= a;
     return *this;
 }
@@ -16,15 +16,15 @@ Histogram Histogram::scale(float a) {
 Histogram Histogram::normalize(int newMax) {
     int max = max_element(_histogram);
     if (max <= 0) max = 1;
-    float a = (float)newMax / (float)max;
+    double a = (double)newMax / (double)max;
     return scale(a);
 }
 
-Histogram Histogram::accumulateAndScale(float a) {
-    vector<float> hist_cum(256, 0);
-    hist_cum[0] = a * (float)_histogram[0];
+Histogram Histogram::accumulateAndScale(double a) {
+    vector<double> hist_cum(256, 0);
+    hist_cum[0] = a * (double)_histogram[0];
     for (int i = 1; i < 256; i++) {
-        hist_cum[i] = hist_cum[i-1] + a * (float)_histogram[i];
+        hist_cum[i] = hist_cum[i-1] + a * (double)_histogram[i];
     }
 
     return Histogram(hist_cum);

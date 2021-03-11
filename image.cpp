@@ -299,9 +299,7 @@ void Image::adjustBrightness(int brightness) {
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
-            p.red(p.red() + brightness);
-            p.blue(p.blue() + brightness);
-            p.green(p.green() + brightness);
+            p += brightness;
         }
     }
 }
@@ -334,7 +332,7 @@ void Image::toNegative() {
 
 Histogram Image::cumulativeGrayscaleHistogram() {
     Histogram histogram = grayscaleHistogram(false);
-    float a = 255.0 / (width() * height());
+    double a = 255.0 / (width() * height());
     return histogram.accumulateAndScale(a);
 }
 

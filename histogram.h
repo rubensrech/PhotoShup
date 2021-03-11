@@ -36,9 +36,9 @@ public:
 
     vector<int> asVector() { return _histogram; }
 
-    Histogram scale(float a);
+    Histogram scale(double a);
     Histogram normalize(int newMax = 255);
-    Histogram accumulateAndScale(float a);
+    Histogram accumulateAndScale(double a);
 
     QChartView *show(QString title = "Grayscale Image Histogram");
 
