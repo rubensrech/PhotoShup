@@ -345,7 +345,7 @@ void Image::equalizeHistogram() {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
             for (int c = 0; c < channels(); c++) {
-                p.channel(c, hist_cum[p.channel(c)]);
+                p.channel(Channel(c), hist_cum[p.channel(Channel(c))]);
             }
         }
     }
@@ -434,7 +434,7 @@ void Image::zoomOut(int sx, int sy) {
                     if (x+iX < inW && y+iY < inH) {
                         Pixel inP = pixel(x+iX, y+iY);
                         for (int iC = 0; iC < c; iC++)
-                            rgbSum[iC] += inP.channel(iC);
+                            rgbSum[iC] += inP.channel(Channel(iC));
                         n++;
                     }
                 }
@@ -444,7 +444,7 @@ void Image::zoomOut(int sx, int sy) {
             Pixel outPixel(&out[dataIndex(outW, outH, c, outX, outY)]);
             for (int iC = 0; iC < c; iC++) {
                 int v = (n > 0) ? rgbSum[iC]/n : rgbSum[iC];
-                outPixel.channel(iC, v);
+                outPixel.channel(Channel(iC), v);
             }
         }
     }
@@ -476,8 +476,8 @@ void Image::zoomIn() {
                 Pixel in0 = this->pixel(x/2, y);
                 Pixel in1 = this->pixel((x+1)/2, y);
                 for (int iC = 0; iC < c; iC++) {
-                    int v = (in0.channel(iC) + in1.channel(iC)) / 2;
-                    outPixel.channel(iC, v);
+                    int v = (in0.channel(Channel(iC)) + in1.channel(Channel(iC))) / 2;
+                    outPixel.channel(Channel(iC), v);
                 }
             }
         }
@@ -491,8 +491,8 @@ void Image::zoomIn() {
             Pixel in0 = this->pixel(x/2, y/2);
             Pixel in1 = this->pixel(x/2, (y+1)/2);
             for (int iC = 0; iC < c; iC++) {
-                int v = (in0.channel(iC) + in1.channel(iC)) / 2;
-                outPixel.channel(iC, v);
+                int v = (in0.channel(Channel(iC)) + in1.channel(Channel(iC))) / 2;
+                outPixel.channel(Channel(iC), v);
             }
         }
     }

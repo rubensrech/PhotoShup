@@ -33,16 +33,15 @@ public:
     Pixel(unsigned char *data) { setData(data); }
 
 
-
     // > Getters
     int red()   { return r != NULL ? *r : -1; }
     int green() { return g != NULL ? *g : -1; }
     int blue()  { return b != NULL ? *b : -1; }
-    int channel(int c) {
+    int channel(Channel c) {
         switch (c) {
-        case 0: return red();
-        case 1: return blue();
-        case 2: return green();
+        case Red: return red();
+        case Green: return green();
+        case Blue: return blue();
         default: return -1;
         }
     };
@@ -59,11 +58,11 @@ public:
     void red(int r)   { if (this->r != NULL) *this->r = clamp(r, 0, 255); }
     void green(int g) { if (this->g != NULL) *this->g = clamp(g, 0, 255); }
     void blue(int b)  { if (this->b != NULL) *this->b = clamp(b, 0, 255); }
-    void channel(int c, int v) {
+    void channel(Channel c, int v) {
         switch (c) {
-        case 0: red(v); break;
-        case 1: blue(v); break;
-        case 2: green(v); break;
+        case Red: red(v); break;
+        case Green: green(v); break;
+        case Blue: blue(v); break;
         }
     }
 
@@ -77,18 +76,7 @@ public:
     void operator+=(int v) { rgb(red()+v, green()+v, blue()+v); }
     void operator*=(double a) { rgb(red()*a, green()*a, blue()*a); }
     void operator<<(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
-
-    void operator<<(vector<int> rgb) {
-        for (int c = 0; c < 3; c++)
-            this->channel(c, rgb[c]);
-    }
-
-    vector<int> operator+(Pixel &p) {
-        vector<int> rgbSum(3, 0);
-        for (int c = 0; c < 3; c++)
-            rgbSum[c] = this->channel(c) + p.channel(c);
-        return rgbSum;
-    }
+    void operator<<(vector<int> rgbVec) { rgb(rgbVec[0], rgbVec[1], rgbVec[2]); }
 
 };
 
