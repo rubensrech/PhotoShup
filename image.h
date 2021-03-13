@@ -3,6 +3,7 @@
 
 #include "histogram.h"
 #include "imagewindow.h"
+#include "kernel.h"
 #include "pixel.h"
 
 #include <vector>
@@ -37,6 +38,7 @@ private:
     void buildPixelsMatrix();
     void load(const char *filename);
     void createWindow(QString windowTitle, bool destroyOnClose = false);
+    void setData(unsigned char *newData);
 
     /*
      * Calculates the position of the channel `c` of a pixel (x,y)
@@ -102,6 +104,7 @@ public:
     void rotate(RotationDirection direction);
     void zoomOut(int sx, int sy);
     void zoomIn();
+    void convolve(Kernel kernel, bool grayBackground);
 
 signals:
     void onClose();

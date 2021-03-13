@@ -25,7 +25,8 @@ void Image::free() {
         this->_window = nullptr;
     }
 
-    stbi_image_free(this->_data);
+    if (this->_data != NULL)
+        stbi_image_free(this->_data);
     this->_data = NULL;
     this->_pxls.clear();
 
@@ -45,17 +46,22 @@ void Image::buildPixelsMatrix() {
     }
 }
 
+void Image::setData(unsigned char *newData) {
+    if (this->_data != NULL)
+        stbi_image_free(this->_data);
+    this->_data = newData;
+    buildPixelsMatrix();
+}
+
 void Image::load(const char *filename) {
     if (!this->isEmpty()) {
         this->free();
     }
 
     _filename = string(filename);
-    _data = stbi_load(filename, &w, &h, &c, 0);
-
     _isGrayscale = channels() == 1;
 
-    buildPixelsMatrix();
+    setData(stbi_load(filename, &w, &h, &c, 0));
 }
 
 void Image::createWindow(QString windowTitle, bool destroyOnClose) {
@@ -86,13 +92,13 @@ Image::Image(Image *fromImg) {
     h = fromImg->height();
     c = fromImg->channels();
 
-    size_t size = w*h*c * sizeof(unsigned char);
-    _data = (unsigned char*)malloc(size);
-    memcpy(_data, fromImg->data(), size);
-
     _isGrayscale = fromImg->isGrayscale();
 
-    buildPixelsMatrix();
+    size_t size = w*h*c * sizeof(unsigned char);
+    unsigned char *newData = (unsigned char*)malloc(size);
+    memcpy(newData, fromImg->data(), size);
+
+   setData(newData);
 }
 
 Image::Image(Image *fromImg, QString windowTitle, bool destroyOnClose):
@@ -132,10 +138,7 @@ void Image::copy(Image *img) {
         this->w = img->w;
         this->h = img->h;
         this->c = img->c;
-        stbi_image_free(this->_data);
-        this->_data = newData;
-
-        buildPixelsMatrix();
+        this->setData(newData);
     }
 
     _isGrayscale = false;
@@ -410,10 +413,7 @@ void Image::rotate(RotationDirection direction) {
 
     this->w = outW;
     this->h = outH;
-    stbi_image_free(this->_data);
-    this->_data = out;
-
-    buildPixelsMatrix();
+    this->setData(out);
 }
 
 void Image::zoomOut(int sx, int sy) {
@@ -449,10 +449,7 @@ void Image::zoomOut(int sx, int sy) {
 
     this->w = outW;
     this->h = outH;
-    stbi_image_free(this->_data);
-    this->_data = out;
-
-    buildPixelsMatrix();
+    this->setData(out);
 }
 
 void Image::zoomIn() {
@@ -462,7 +459,7 @@ void Image::zoomIn() {
     int outW = 2*inW-1, outH = 2*inH-1;
     unsigned char *out = (unsigned char*)malloc(outH*outW*c * sizeof(unsigned char));
 
-    // Fill even rows of output image
+    // Compute even rows of output image
     for (int y = 0; y < inH; y++) {
         for (int x = 0; x < outW; x++) {
             Pixel outPixel(&out[dataIndex(outW, outH, c, x, y*2)]);
@@ -497,8 +494,29 @@ void Image::zoomIn() {
 
     this->w = outW;
     this->h = outH;
-    stbi_image_free(this->_data);
-    this->_data = out;
+    this->setData(out);
+}
 
-    buildPixelsMatrix();
+void Image::convolve(Kernel kernel, bool grayBackground) {
+    if (isEmpty()) return;
+
+    unsigned char *out = (unsigned char*)malloc(h*w*c * sizeof(unsigned char));
+
+    for (int y = 1; y < height()-1; y++) {
+        for (int x = 1; x < width()-1; x++) {
+            double acc = grayBackground ? 127 : 0;
+            for (int dy = 0; dy < kernel.height(); dy++) {
+                for (int dx = 0; dx < kernel.width(); dx++) {
+                    // acc += K[dx][dy] * I[x+(1-dx)][y+(1-dy)]
+                    Pixel p = pixel(x + (1-dx), y + (1-dy));
+                    acc += kernel.at(dx, dy) * p.luminance();
+                }
+            }
+
+            Pixel outPixel(&out[dataIndex(w, h, c, x, y)]);
+            outPixel.rgb(acc, acc, acc);
+        }
+    }
+
+    this->setData(out);
 }

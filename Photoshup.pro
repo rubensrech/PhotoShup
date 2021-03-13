@@ -23,6 +23,7 @@ HEADERS += \
     histogram.h \
     image.h \
     imagewindow.h \
+    kernel.h \
     mainwindow.h \
     pixel.h \
     stb_image.h \

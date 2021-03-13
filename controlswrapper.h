@@ -2,6 +2,7 @@
 #define CONTROLSWRAPPER_H
 
 #include "util.h"
+#include "kernel.h"
 
 #include <vector>
 using namespace std;
@@ -10,6 +11,7 @@ using namespace std;
 #include <QSlider>
 #include <QSpinBox>
 #include <QWidget>
+#include <QCheckBox>
 
 class ControlsWrapper : public QWidget {
     Q_OBJECT
@@ -23,6 +25,8 @@ private:
     QDoubleSpinBox *contrastValBox;
     QSpinBox *zoomOutSxValBox;
     QSpinBox *zoomOutSyValBox;
+    vector<vector<QDoubleSpinBox*>> kernelValBoxes;
+    QCheckBox *grayBgCheckbox;
 
 // > Methods
 
@@ -37,6 +41,7 @@ private:
     QWidget *createContrastControls(QWidget *parent);
     QWidget *createRotationControls(QWidget *parent);
     QWidget *createZoomControls(QWidget *parent);
+    QWidget *createConvolutionControls(QWidget *parent);
     QWidget *createImgProcessingControls(QWidget *parent);
 
     QString selectImageFile(QString caption);
@@ -54,9 +59,9 @@ public slots:
     void handleQuantizeClicked();
     void handleBrightnessClicked();
     void handleContrastClicked();
-    void handleRotateClockwiseClicked();
-    void handleRotateCounterClockwiseClicked();
     void handleZoomOutClicked();
+    void handlePredefKernelClicked(KernelName kernelName);
+    void handleConvolveClicked();
 
 signals:
     void openClicked(const char *filename);
@@ -75,6 +80,7 @@ signals:
     void rotateClicked(RotationDirection direction);
     void zoomOutClicked(int sx, int sy);
     void zoomInClicked();
+    void convolveClicked(Kernel kernel, bool grayBackground);
 
 };
 

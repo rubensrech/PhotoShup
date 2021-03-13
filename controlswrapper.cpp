@@ -1,9 +1,11 @@
 #include "controlswrapper.h"
 
 #include <QFileDialog>
+#include <QFormLayout>
 #include <QGroupBox>
-#include <QLabel>
 #include <QVBoxLayout>
+
+#include "kernel.h"
 
 #define DFT_SPACING 5
 #define DFT_MARGIN  5
@@ -49,17 +51,17 @@ QWidget *ControlsWrapper::createHistogramControls(QWidget *parent) {
     group->setLayout(layout);
 
     // 1. Show Histogram button
-    QPushButton *showHistButton = createButton("Show Histogram", group);
+    QPushButton *showHistButton = createButton("Show", group);
     connect(showHistButton, &QPushButton::clicked, this, &ControlsWrapper::showHistogramClicked);
     layout->addWidget(showHistButton);
 
     // 2. Equalize Histogram button
-    QPushButton *eqHistButton = createButton("Equalize Histogram", group);
+    QPushButton *eqHistButton = createButton("Equalize", group);
     connect(eqHistButton, &QPushButton::clicked, this, &ControlsWrapper::equalizeHistogramClicked);
     layout->addWidget(eqHistButton);
 
     // 3. Match Histogram button
-    QPushButton *matchHistButton = createButton("Match Histogram", group);
+    QPushButton *matchHistButton = createButton("Match", group);
     connect(matchHistButton, &QPushButton::clicked, this, &ControlsWrapper::handleMatchHistogramClicked);
     layout->addWidget(matchHistButton);
 
@@ -69,36 +71,26 @@ QWidget *ControlsWrapper::createHistogramControls(QWidget *parent) {
 QWidget *ControlsWrapper::createQuantizationControls(QWidget *parent) {
     QGroupBox *group = new QGroupBox("Quantization", parent);
 
-    QVBoxLayout *layout = new QVBoxLayout(group);
+    QFormLayout *layout = new QFormLayout(group);
+    layout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     layout->setSpacing(DFT_SPACING);
     layout->setMargin(DFT_MARGIN);
 
     group->setLayout(layout);
 
-    // 1. Quantization row
-    QWidget *row = new QWidget(group);
-    QHBoxLayout *rowLayout = new QHBoxLayout(row);
-    rowLayout->setSpacing(DFT_SPACING);
-    rowLayout->setMargin(0);
-    row->setLayout(rowLayout);
-    layout->addWidget(row);
-
-    // 1.1. Quantization label
-    QLabel *label = new QLabel("Colors: ", row);
-    rowLayout->addWidget(label);
-
-    // 1.2. Quantization spin box
-    quantizeValBox = new QSpinBox(row);
+    // 1. Colors spin box
+    quantizeValBox = new QSpinBox(group);
     quantizeValBox->setRange(0, 256);
     quantizeValBox->setSingleStep(10);
     quantizeValBox->setValue(256);
-    rowLayout->addWidget(quantizeValBox);
+    layout->addRow("Colors:", quantizeValBox);
     disablingControls.push_back(quantizeValBox);
 
-    // 2. Quantization button
+
+    // 2. Quantize button
     QPushButton *quantButton = createButton("Quantize", group);
     connect(quantButton, &QPushButton::clicked, this, &ControlsWrapper::handleQuantizeClicked);
-    layout->addWidget(quantButton);
+    layout->addRow(quantButton);
 
     return group;
 }
@@ -122,7 +114,7 @@ QWidget *ControlsWrapper::createBrightnessControls(QWidget *parent) {
     disablingControls.push_back(brightnessSlider);
 
     // 2. Brightness button
-    QPushButton *button = createButton("Adjust brightness", group);
+    QPushButton *button = createButton("Adjust", group);
     connect(button, &QPushButton::clicked, this, &ControlsWrapper::handleBrightnessClicked);
     layout->addWidget(button);
 
@@ -148,7 +140,7 @@ QWidget *ControlsWrapper::createContrastControls(QWidget *parent) {
     disablingControls.push_back(contrastValBox);
 
     // 2. Contrast button
-    QPushButton *button = createButton("Adjust constrast", group);
+    QPushButton *button = createButton("Adjust", group);
     connect(button, &QPushButton::clicked, this, &ControlsWrapper::handleContrastClicked);
     layout->addWidget(button);
 
@@ -166,12 +158,12 @@ QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
 
     // 1. Clockwise button
     QPushButton *clkwiseButton = createButton("Clockwise", group);
-    connect(clkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::handleRotateClockwiseClicked);
+    connect(clkwiseButton, &QPushButton::clicked, [this]{ rotateClicked(ClockWise); });
     layout->addWidget(clkwiseButton);
 
     // 2. Counter-clockwise button
-    QPushButton *counterClkwiseButton = createButton("Counter-clockwise", group);
-    connect(counterClkwiseButton, &QPushButton::clicked, this, &ControlsWrapper::handleRotateCounterClockwiseClicked);
+    QPushButton *counterClkwiseButton = createButton("Counter-clk", group);
+    connect(counterClkwiseButton, &QPushButton::clicked, [this]{ rotateClicked(CounterClockwise); });
     layout->addWidget(counterClkwiseButton);
 
     return group;
@@ -180,57 +172,126 @@ QWidget *ControlsWrapper::createRotationControls(QWidget *parent) {
 QWidget *ControlsWrapper::createZoomControls(QWidget *parent) {
     QGroupBox *group = new QGroupBox("Zoom", parent);
 
+    QFormLayout *layout = new QFormLayout(group);
+    layout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    layout->setSpacing(DFT_SPACING);
+    layout->setMargin(DFT_MARGIN);
+
+    group->setLayout(layout);
+
+    // 1. Horiz. spin box
+    zoomOutSxValBox = new QSpinBox(group);
+    zoomOutSxValBox->setMinimum(1);
+    zoomOutSxValBox->setSingleStep(1);
+    zoomOutSxValBox->setValue(2);
+    layout->addRow("Horiz:", zoomOutSxValBox);
+    disablingControls.push_back(zoomOutSxValBox);
+
+    // 2. Vert. spin box
+    zoomOutSyValBox = new QSpinBox(group);
+    zoomOutSyValBox->setMinimum(1);
+    zoomOutSyValBox->setSingleStep(1);
+    zoomOutSyValBox->setValue(2);
+    layout->addRow("Vert:", zoomOutSyValBox);
+    disablingControls.push_back(zoomOutSyValBox);
+
+    // 2. Zoom out button
+    QPushButton *zoomOutButton = createButton("Zoom out", group);
+    connect(zoomOutButton, &QPushButton::clicked, this, &ControlsWrapper::handleZoomOutClicked);
+    layout->addRow(zoomOutButton);
+
+    // 3. Separator line
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addRow(line);
+
+    // 4. Zoom in button
+    QPushButton *zoomInButton = createButton("Zoom in", group);
+    connect(zoomInButton, &QPushButton::clicked, this, &ControlsWrapper::zoomInClicked);
+    layout->addRow(zoomInButton);
+
+    return group;
+}
+
+QWidget *ControlsWrapper::createConvolutionControls(QWidget *parent) {
+    QGroupBox *group = new QGroupBox("Convolution", parent);
+
     QVBoxLayout *layout = new QVBoxLayout(group);
     layout->setSpacing(DFT_SPACING);
     layout->setMargin(DFT_MARGIN);
 
     group->setLayout(layout);
 
-    // 1. Zoom out row
-    QWidget *row = new QWidget(group);
-    QHBoxLayout *rowLayout = new QHBoxLayout(row);
-    rowLayout->setSpacing(0);
-    rowLayout->setMargin(0);
-    row->setLayout(rowLayout);
-    layout->addWidget(row);
+    // 1. Predefined kernels group
+    QGroupBox *predefGrid = new QGroupBox("Predefined kernels", group);
+    QGridLayout *predefGridLayout = new QGridLayout(predefGrid);
+    predefGridLayout->setSpacing(2);
+    predefGridLayout->setMargin(0);
+    predefGrid->setLayout(predefGridLayout);
+    layout->addWidget(predefGrid);
+    // 1.0.0. Laplacian button
+    QPushButton *laplacianButton = createButton("Laplacian", predefGrid);
+    connect(laplacianButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(Laplacian); });
+    predefGridLayout->addWidget(laplacianButton, 0, 0);
+    // 1.0.1. High Pass button
+    QPushButton *highpassButton = createButton("High Pass", predefGrid);
+    connect(highpassButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(HighPass); });
+    predefGridLayout->addWidget(highpassButton, 0, 1);
+    // 1.1.0. PrewittX button
+    QPushButton *prewittXButton = createButton("Prewitt X", predefGrid);
+    connect(prewittXButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(PrewittX); });
+    predefGridLayout->addWidget(prewittXButton, 1, 0);
+    // 1.1.1. PrewittY button
+    QPushButton *prewittYButton = createButton("Prewitt Y", predefGrid);
+    connect(prewittYButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(PrewittY); });
+    predefGridLayout->addWidget(prewittYButton, 1, 1);
+    // 1.2.0. Sobel X button
+    QPushButton *sobelXButton = createButton("Sobel X", predefGrid);
+    connect(sobelXButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(SobelX); });
+    predefGridLayout->addWidget(sobelXButton, 2, 0);
+    // 1.2.1. Sobel Y button
+    QPushButton *sobelYButton = createButton("Sobel Y", predefGrid);
+    connect(sobelYButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(SobelY); });
+    predefGridLayout->addWidget(sobelYButton, 2, 1);
+    // 1.3.0. Gaussian button
+    QPushButton *gaussianButton = createButton("Gaussian", predefGrid);
+    connect(gaussianButton, &QPushButton::clicked, [this]{ handlePredefKernelClicked(Gaussian); });
+    predefGridLayout->addWidget(gaussianButton, 3, 0);
+    // 1.3.1. Gray Background checkbox
+    grayBgCheckbox = new QCheckBox("Gray bkgnd", predefGrid);
+    disablingControls.push_back(grayBgCheckbox);
+    predefGridLayout->addWidget(grayBgCheckbox, 3, 1, Qt::AlignCenter);
 
-    // 1.1. Sx label
-    QLabel *sxLabel = new QLabel("Sx: ", row);
-    rowLayout->addWidget(sxLabel);
-    // 1.2. Sx spin box
-    zoomOutSxValBox = new QSpinBox(row);
-    zoomOutSxValBox->setMinimum(1);
-    zoomOutSxValBox->setSingleStep(1);
-    zoomOutSxValBox->setValue(2);
-    rowLayout->addWidget(zoomOutSxValBox);
-    disablingControls.push_back(zoomOutSxValBox);
+    // 2. Kernel values grid
+    QWidget *kernelValsGrid = new QWidget(group);
+    QGridLayout *kernelValsGridLayout = new QGridLayout(kernelValsGrid);
+    kernelValsGridLayout->setSpacing(2);
+    kernelValsGridLayout->setMargin(0);
+    kernelValsGrid->setLayout(kernelValsGridLayout);
+    layout->addWidget(kernelValsGrid);
 
-    // 1.1. Sy label
-    QLabel *syLabel = new QLabel("Sy: ", row);
-    rowLayout->addWidget(syLabel);
-    // 1.2. Sy spin box
-    zoomOutSyValBox = new QSpinBox(row);
-    zoomOutSyValBox->setMinimum(1);
-    zoomOutSyValBox->setSingleStep(1);
-    zoomOutSyValBox->setValue(2);
-    rowLayout->addWidget(zoomOutSyValBox);
-    disablingControls.push_back(zoomOutSyValBox);
+    kernelValBoxes.reserve(KERNEL_SIZE);
+    for (int y = 0; y < KERNEL_SIZE; y++) {
+        kernelValBoxes[y].reserve(KERNEL_SIZE);
+        for (int x = 0; x < KERNEL_SIZE; x++) {
+            // 1.y.x. Kernel values spin box
+            QDoubleSpinBox *spinBox = new QDoubleSpinBox(group);
+            spinBox->setSingleStep(0.1);
+            spinBox->setDecimals(4);
+            spinBox->setMaximumWidth(70);
+            spinBox->setValue(0.1111);
+            spinBox->setRange(-100, 100);
+            kernelValsGridLayout->addWidget(spinBox, y, x);
+            kernelValBoxes[y][x] = spinBox;
+            disablingControls.push_back(spinBox);
+        }
+    }
 
-    // 2. Zoom out button
-    QPushButton *zoomOutButton = createButton("Zoom out", group);
-    connect(zoomOutButton, &QPushButton::clicked, this, &ControlsWrapper::handleZoomOutClicked);
-    layout->addWidget(zoomOutButton);
-
-    // 3. Separator line
-    QFrame* line = new QFrame();
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-    layout->addWidget(line);
-
-    // 4. Zoom in button
-    QPushButton *zoomInButton = createButton("Zoom in 2x2", group);
-    connect(zoomInButton, &QPushButton::clicked, this, &ControlsWrapper::zoomInClicked);
-    layout->addWidget(zoomInButton);
+    // 3. Convolution button
+    QPushButton *convButton = createButton("Convolve", group);
+    connect(convButton, &QPushButton::clicked, this, &ControlsWrapper::handleConvolveClicked);
+    layout->addWidget(convButton);
 
     return group;
 }
@@ -269,23 +330,34 @@ QWidget *ControlsWrapper::createImgProcessingControls(QWidget *parent) {
     connect(negativeButton, &QPushButton::clicked, this, &ControlsWrapper::negativeClicked);
     layout->addWidget(negativeButton);
 
-    // 6. Histogram group
-    layout->addWidget(createHistogramControls(group));
+    // 6. Grid
+    QWidget *grid = new QWidget(group);
+    QGridLayout *gridLayout = new QGridLayout(grid);
+    gridLayout->setMargin(0);
+    gridLayout->setSpacing(0);
+    grid->setLayout(gridLayout);
+    layout->addWidget(grid);
 
-    // 7. Quantization group
-    layout->addWidget(createQuantizationControls(group));
+    // 6.0.0. Brightness group
+    gridLayout->addWidget(createBrightnessControls(grid), 0, 0);
 
-    // 8. Brightness group
-    layout->addWidget(createBrightnessControls(group));
+    // 6.0.1. Contrast group
+    gridLayout->addWidget(createContrastControls(grid), 0, 1);
 
-    // 9. Constrast group
-    layout->addWidget(createContrastControls(group));
+    // 6.1.0. Rotate group
+    gridLayout->addWidget(createRotationControls(grid), 1, 0);
 
-    // 10. Rotate group
-    layout->addWidget(createRotationControls(group));
+    // 6.1.1. Quantization group
+    gridLayout->addWidget(createQuantizationControls(grid), 1, 1);
 
-    // 11. Zoom group
-    layout->addWidget(createZoomControls(group));
+    // 6.2.0. Histogram group
+    gridLayout->addWidget(createHistogramControls(grid), 2, 0);
+
+    // 6.2.1. Zoom group
+    gridLayout->addWidget(createZoomControls(grid), 2, 1);
+
+    // 7. Convolution group
+    layout->addWidget(createConvolutionControls(group));
 
     return group;
 }
@@ -340,17 +412,31 @@ void ControlsWrapper::handleContrastClicked() {
     emit contrastClicked(contrast);
 }
 
-void ControlsWrapper::handleRotateClockwiseClicked() {
-    emit rotateClicked(ClockWise);
-}
-
-void ControlsWrapper::handleRotateCounterClockwiseClicked() {
-    emit rotateClicked(CounterClockwise);
-}
-
 void ControlsWrapper::handleZoomOutClicked() {
     int sx = zoomOutSxValBox->value();
     int sy = zoomOutSyValBox->value();
     emit zoomOutClicked(sx, sy);
+}
+
+void ControlsWrapper::handlePredefKernelClicked(KernelName kernelName) {
+    Kernel kernel = Kernel::getByName(kernelName);
+    for (int y = 0; y < KERNEL_SIZE; y++) {
+        for (int x = 0; x < KERNEL_SIZE; x++) {
+            kernelValBoxes[y][x]->setValue(kernel.at(x, y));
+        }
+    }
+}
+
+void ControlsWrapper::handleConvolveClicked() {
+    vector<vector<double>> kernelVals(KERNEL_SIZE, vector<double>(KERNEL_SIZE));
+    for (int y = 0; y < KERNEL_SIZE; y++) {
+        for (int x = 0; x < KERNEL_SIZE; x++) {
+            kernelVals[y][x] = kernelValBoxes[y][x]->value();
+        }
+    }
+
+    Kernel kernel(kernelVals);
+    bool grayBackground = grayBgCheckbox->checkState() == Qt::Checked;
+    emit convolveClicked(kernel, grayBackground);
 }
 
