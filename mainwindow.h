@@ -48,6 +48,7 @@ private slots:
     void rotate(RotationDirection direction);
     void zoomOut(int sx, int sy);
     void zoomIn();
+    void convolve(Kernel kernel, bool grayBackground);
 
     void origImgWasClosed();
     void editImgWasClosed();

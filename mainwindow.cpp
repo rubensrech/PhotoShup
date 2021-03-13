@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <chrono>
 using namespace std;
 
 #define X_MARGIN 30
@@ -21,7 +22,8 @@ MainWindow::MainWindow(const char *filename):
 
     QWidget *centralWidget = new QWidget(this);
     QHBoxLayout *layout = new QHBoxLayout(centralWidget);
-    layout->setMargin(5);
+    layout->setMargin(0);
+    layout->setSpacing(0);
 
     controls = new ControlsWrapper(centralWidget);
     connect(controls, &ControlsWrapper::openClicked, this, &MainWindow::openImgFile);
@@ -40,6 +42,7 @@ MainWindow::MainWindow(const char *filename):
     connect(controls, &ControlsWrapper::rotateClicked, this, &MainWindow::rotate);
     connect(controls, &ControlsWrapper::zoomOutClicked, this, &MainWindow::zoomOut);
     connect(controls, &ControlsWrapper::zoomInClicked, this, &MainWindow::zoomIn);
+    connect(controls, &ControlsWrapper::convolveClicked, this, &MainWindow::convolve);
     layout->addWidget(controls);
 
     this->setCentralWidget(centralWidget);
@@ -261,12 +264,29 @@ void MainWindow::rotate(RotationDirection direction) {
 }
 
 void MainWindow::zoomOut(int sx, int sy) {
+    auto started = chrono::high_resolution_clock::now();
     img->zoomOut(sx, sy);
+    auto done = chrono::high_resolution_clock::now();
+    cout << "Zoom out: " << chrono::duration_cast<chrono::milliseconds>(done-started).count() << " ms" << endl;
+
     img->render();
 }
 
 void MainWindow::zoomIn() {
+    auto started = chrono::high_resolution_clock::now();
     img->zoomIn();
+    auto done = chrono::high_resolution_clock::now();
+    cout << "Zoom in: " << chrono::duration_cast<chrono::milliseconds>(done-started).count() << " ms" << endl;
+
+    img->render();
+}
+
+void MainWindow::convolve(Kernel kernel, bool grayBackground) {
+    auto started = chrono::high_resolution_clock::now();
+    img->convolve(kernel, grayBackground);
+    auto done = chrono::high_resolution_clock::now();
+    cout << "Convolve: " << chrono::duration_cast<chrono::milliseconds>(done-started).count() << " ms" << endl;
+
     img->render();
 }
 

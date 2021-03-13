@@ -500,13 +500,13 @@ void Image::zoomIn() {
 void Image::convolve(Kernel kernel, bool grayBackground) {
     if (isEmpty()) return;
 
-    unsigned char *out = (unsigned char*)malloc(h*w*c * sizeof(unsigned char));
+    unsigned char *out = (unsigned char*)calloc(h*w*c, sizeof(unsigned char));
 
-    for (int y = 1; y < height()-1; y++) {
-        for (int x = 1; x < width()-1; x++) {
+    for (int x = 1; x < width()-1; x++) {
+        for (int y = 1; y < height()-1; y++) {
             double acc = grayBackground ? 127 : 0;
-            for (int dy = 0; dy < kernel.height(); dy++) {
-                for (int dx = 0; dx < kernel.width(); dx++) {
+            for (int dx = 0; dx < kernel.width(); dx++) {
+                for (int dy = 0; dy < kernel.height(); dy++) {
                     // acc += K[dx][dy] * I[x+(1-dx)][y+(1-dy)]
                     Pixel p = pixel(x + (1-dx), y + (1-dy));
                     acc += kernel.at(dx, dy) * p.luminance();

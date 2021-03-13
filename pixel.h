@@ -75,6 +75,7 @@ public:
     void operator+=(int v) { rgb(red()+v, green()+v, blue()+v); }
     void operator*=(double a) { rgb(red()*a, green()*a, blue()*a); }
     void operator<<(Pixel p) { rgb(p.red(), p.green(), p.blue()); }
+    void operator<<(int v) { rgb(v, v, v); }
 
 };
 
