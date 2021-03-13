@@ -153,7 +153,7 @@ void MainWindow::quantizeImg(int n) {
 
 void MainWindow::showImgHistogram() {
     img->toGrayScale();
-    img->grayscaleHistogram(true).show();
+    img->grayscaleHistogram().show();
     img->render();
 }
 
@@ -188,7 +188,7 @@ void MainWindow::equalizeHistogram() {
     bool isGrayscale = img->isGrayscale();
     if (isGrayscale) {
         // Display histogram of the image before equalization
-        QChartView *hBefore = img->grayscaleHistogram(true).show("Histogram: Before equalization");
+        QChartView *hBefore = img->grayscaleHistogram().show("Histogram: Before equalization");
 
         // Set the position of the histogram (before equalization)
         int hBeforeH = hBefore->height();
@@ -202,7 +202,7 @@ void MainWindow::equalizeHistogram() {
 
     if (isGrayscale) {
         // Display histogram of the image after equalization
-        QChartView *hAfter = img->grayscaleHistogram(true).show("Histogram: After equalization");
+        QChartView *hAfter = img->grayscaleHistogram().show("Histogram: After equalization");
 
         // Set the position of the histogram (after equalization)
         ImageWindow *imgAfterWindow = img->window();
@@ -222,14 +222,14 @@ void MainWindow::matchHistogram(const char *targetFilename) {
     // Set target image position
     ImageWindow *targetImgWindow = targetImg->window();
     ImageWindow *origImgWindow = origImg->window();
-    int targetImgX = origImgWindow->x(), targetImgY = origImgWindow->y();
+    int targetImgX = origImgWindow->x() + 10, targetImgY = origImgWindow->y() + 10;
     targetImgWindow->move(targetImgX, targetImgY);
 
     // Perform the histogram matching operation
     img->matchHistogramOf(targetImg);
 
     // Display target image histogram
-    QChartView *hTarget = targetImg->grayscaleHistogram(true).show("Histogram: Histogram Matching target");
+    QChartView *hTarget = targetImg->grayscaleHistogram().show("Histogram: Histogram Matching target");
     // Set the position of target image histogram
     int hTargetH = hTarget->height();
     int hTargetX = targetImgWindow->x();
@@ -237,7 +237,7 @@ void MainWindow::matchHistogram(const char *targetFilename) {
     hTarget->move(hTargetX, hTargetY);
 
     // Display source image histogram
-    QChartView *hSrc = img->grayscaleHistogram(true).show("Histogram: Histogram Matching source");
+    QChartView *hSrc = img->grayscaleHistogram().show("Histogram: Histogram Matching source");
     // Set the position of source image histogram
     ImageWindow *srcImgWindow = img->window();
     int hSrcH = hSrc->height();

@@ -279,7 +279,7 @@ void Image::quantize(int n) {
     }
 }
 
-Histogram Image::grayscaleHistogram(bool normalized) {
+Histogram Image::grayscaleHistogram() {
     Histogram histogram;
 
     if (isEmpty()) return histogram;
@@ -292,7 +292,6 @@ Histogram Image::grayscaleHistogram(bool normalized) {
         }
     }
 
-    if (normalized) return histogram.normalize();
     return histogram;
 }
 
@@ -332,7 +331,7 @@ void Image::toNegative() {
 }
 
 Histogram Image::cumulativeGrayscaleHistogram() {
-    Histogram histogram = grayscaleHistogram(false);
+    Histogram histogram = grayscaleHistogram();
     double a = 255.0 / (double)(width() * height());
     return histogram.accumulateAndScale(a);
 }

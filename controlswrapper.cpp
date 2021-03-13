@@ -61,7 +61,7 @@ QWidget *ControlsWrapper::createHistogramControls(QWidget *parent) {
     layout->addWidget(eqHistButton);
 
     // 3. Match Histogram button
-    QPushButton *matchHistButton = createButton("Match", group);
+    QPushButton *matchHistButton = createButton("Match ...", group);
     connect(matchHistButton, &QPushButton::clicked, this, &ControlsWrapper::handleMatchHistogramClicked);
     layout->addWidget(matchHistButton);
 

@@ -94,7 +94,7 @@ public:
     void flipVertically();
     void toGrayScale();
     void quantize(int n);
-    Histogram grayscaleHistogram(bool normalized);
+    Histogram grayscaleHistogram();
     void adjustBrightness(int brightness);
     void adjustContrast(double contrast);
     void toNegative();
