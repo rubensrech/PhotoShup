@@ -113,12 +113,17 @@ Image::~Image() {
 bool Image::save(const char *filename, int quality) {
     if (isEmpty()) return false;
 
-    string f(filename);
-    string ext = f.substr(f.find_last_of('.')+1);
+    string f(filename); 
+    string ext = (f.find_last_of('.') == string::npos) ? "" : f.substr(f.find_last_of('.')+1);
     for_each(ext.begin(), ext.end(), [](char &c) { c = ::tolower(c); });
 
+    if (ext == "") {
+        f += ".jpg";
+        ext = "jpg";
+    }
+
     if (ext == "jpg")
-        return stbi_write_jpg(filename, width(), height(), channels(), data(), quality) != 0;
+        return stbi_write_jpg(f.c_str(), width(), height(), channels(), data(), quality) != 0;
 
     throw runtime_error("Image::save - Unsupported file extension");
 
@@ -342,7 +347,7 @@ void Image::equalizeHistogram() {
     // Compute cumulative histogram
     Histogram hist_cum = cumulativeGrayscaleHistogram();
 
-    // Use renormalized cumulative histogram of the Luminance channel for equalization
+    // Use normalized cumulative histogram of the Luminance channel for equalization
     for (int x = 0; x < width(); x++) {
         for (int y = 0; y < height(); y++) {
             Pixel p = pixel(x, y);
